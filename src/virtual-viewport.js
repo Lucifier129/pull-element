@@ -161,26 +161,22 @@ extend(VirtualViewport.prototype, {
 		this.target = null
 		this.scroller = null
 	},
-	getDamp: function () {
+	damp: function (valueX, valueY) {
 		var damp = this.props.damp
+		var props = this.props
+		var state = this.state
+		var weightX = props.weightX
+		var weightY = props.weightY
+		var directionX = state.directionX
+		var directionY = state.directionY
 
-		if (isNumber(damp)) {
-			return {
-				isTop: damp,
-				bottom: damp,
-				left: damp,
-				right: damp,
+		if (directionX && directionY) {
+			if (weightX) {
+				valueY = 0
+				valueX = valueX / damp[directionX]
 			}
 		}
 
-		if (isFunction(damp)) {
-
-		}
-
-
-		if (!isObject(props.damp)) {
-			return props.damp
-		}
 
 		var props = this.props
 		var state = this.state
@@ -324,10 +320,8 @@ extend(VirtualViewport.prototype, {
 
 		if (directionX || directionY) {
 			event.preventDefault()
-			this.setTranslate({
-				x: offsetX,
-				y: offsetY,
-			})
+			var position = this.damp(offsetX, offsetY)
+			this.setTranslate(position)
 		}
 	},
 	handleEnd: function (event) {
