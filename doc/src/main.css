@@ -9,9 +9,18 @@
     height: 100%;
     overflow: hidden;
 }*/
-
+html {
+    /*width: 100%;
+    height: 100%;
+    overflow: hidden;*/
+}
 body {
     background: #eaeaea;
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+    /*width: 100%;
+    height: 100%;
+    overflow: hidden;*/
 }
 
 #root {
@@ -22,19 +31,24 @@ body {
     background: #fff;
 }
 
+.app {
+    height: 100%;
+}
+
 .info {
     position: relative;
-    z-index: 10px;
+    z-index: 10;
     width: 100%;
     height: 70px;
     overflow: auto;
     background: grey;
     color: #fff;
-    z-index: 11;
+    z-index: 12;
     text-align: center;
 }
 
 .list {
+    position: relative;
     user-select: none;
     text-align: center;
     line-height: 40px
@@ -57,6 +71,10 @@ body {
 .wrapper {
     position: relative;
     text-align: center;
+    /*height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;*/
 }
 
 .pull_refresh {
@@ -67,7 +85,7 @@ body {
     height: 40px;
     text-align: center;
     color: #00a9f2;
-    z-index: 10;
+    z-index: 11;
 }
 
 .arrow {}

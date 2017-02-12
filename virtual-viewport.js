@@ -11,8 +11,10 @@
 	'use strict';
 
 	function extend(target) {
-		for (var i = 1; i < arguments.length; i++) {
-			var source = arguments[i]
+		var args = arguments
+		var argsLen = args.length
+		for (var i = 1; i < argsLen; i++) {
+			var source = args[i]
 			for (var key in source) {
 				target[key] = source[key]
 			}
@@ -43,6 +45,7 @@
 		var offsetHeight = scroller.offsetHeight
 		var scrollWidth = scroller.scrollWidth
 		var scrollHeight = scroller.scrollHeight
+
 		var scrollBaseInfo = {
 			scrollTop: scrollTop,
 			scrollLeft: scrollLeft,
@@ -84,19 +87,16 @@
 		}
 	}
 
-	function getTranslateStyle(obj) {
-		var translateValue = 'translate(' + obj.x + 'px,' + obj.y + 'px)'
+	function getTranslateStyle(position) {
+		var translateValue = 'translate(' + position.x + 'px,' + position.y + 'px)'
 		return {
 			'transform': translateValue,
 			'-webkit-transform': translateValue,
 		}
 	}
 
-	function getElem(elem, context) {
-		if (typeof elem === 'string') {
-			return (context || document).querySelector(elem)
-		}
-		return elem
+	function getElem(elem) {
+		return typeof elem === 'string' ? document.querySelector(elem) : elem
 	}
 
 	function addEvent(elem, type, handler) {
@@ -108,11 +108,15 @@
 	}
 
 	function getCoor(event) {
-		var targetEvent = event.touches && event.touches.length ? event.touches[0] : event
+		var targetEvent = event.touches ? event.touches[0] : event
 		return {
 			x: targetEvent.clientX,
 			y: targetEvent.clientY,
 		}
+	}
+
+	function getDampingValue(damping, defaultDamping) {
+		return isNumber(damping) || isFunction(damping) ? damping : defaultDamping
 	}
 
 	var staticScrollStatus = {
@@ -141,15 +145,16 @@
 		offsetY: 0,
 		translateX: 0,
 		translateY: 0,
-		axis: '',
 		directionX: '',
 		directionY: '',
+		axis: '',
 	}
 
 	var defaultProps = {
 		target: 'body',
 		scroller: '',
-		damp: 1.6,
+		trigger: '',
+		damping: 1.6,
 		stopPropagation: true,
 		top: true,
 		bottom: false,
@@ -167,7 +172,6 @@
 		this.props = extend({}, defaultProps, options)
 		this.state = extend({}, defaultState)
 		this.isTouching = false
-		this.dpr = 0
 		this.handleStart = this.handleStart.bind(this)
 		this.handleMove = this.handleMove.bind(this)
 		this.handleEnd = this.handleEnd.bind(this)
@@ -180,37 +184,34 @@
 			var doc = this.document = window.document
 			var target = this.target = getElem(props.target)
 			var scroller = this.scroller = props.scroller ? getElem(props.scroller) : target
+			this.trigger = props.trigger ? getElem(props.trigger) : target
 			this.isGlobalScroller = scroller === doc.body || scroller === window || scroller === doc
-			this.setDampProp()
-			this.addEvent()
+			this.setDampingProp()
+			this.enable()
 		},
 		destroy: function() {
-			this.removeEvent()
+			this.disable()
 			this.document = null
 			this.target = null
 			this.scroller = null
+			this.trigger = null
 		},
-		setProps: function(newProps) {
-			this.destroy()
-			extend(this.props, newProps)
-			this.init()
-		},
-		setDampProp: function() {
-			var damp = this.props.damp
-			if (isNumber(damp)) {
-				this.props.damp = {
-					left: damp,
-					right: damp,
-					top: damp,
-					bottom: damp,
+		setDampingProp: function() {
+			var damping = this.props.damping
+			if (isNumber(damping) || isFunction(damping)) {
+				this.props.damping = {
+					left: damping,
+					right: damping,
+					top: damping,
+					bottom: damping,
 				}
-			} else if (isObject(damp)) {
-				var defaultDamp = defaultProps.damp
-				this.props.damp = {
-					left: isNumber(damp.left) ? damp.left : defaultDamp,
-					right: isNumber(damp.right) ? damp.right : defaultDamp,
-					top: isNumber(damp.top) ? damp.top : defaultDamp,
-					bottom: isNumber(damp.bottom) ? damp.bottom : defaultDamp,
+			} else if (isObject(damping)) {
+				var defaultDamping = defaultProps.damping
+				this.props.damping = {
+					left: getDampingValue(damping.left, defaultDamping),
+					right: getDampingValue(damping.right, defaultDamping),
+					top: getDampingValue(damping.top, defaultDamping),
+					bottom: getDampingValue(damping.bottom, defaultDamping),
 				}
 			}
 		},
@@ -238,11 +239,15 @@
 			}
 			this.animateTo(position, otherStyle)
 		},
-		addEvent: function() {
-			addEvent(this.target, 'touchstart', this.handleStart)
+		enable: function() {
+			addEvent(this.trigger, 'touchstart', this.handleStart)
+			addEvent(this.document, 'touchmove', this.handleMove)
+			addEvent(this.document, 'touchend', this.handleEnd)
 		},
-		removeEvent: function() {
-			removeEvent(this.target, 'touchstart', this.handleStart)
+		disable: function() {
+			removeEvent(this.trigger, 'touchstart', this.handleStart)
+			removeEvent(this.document, 'touchmove', this.handleMove)
+			removeEvent(this.document, 'touchend', this.handleEnd)
 		},
 		getScrollInfo: function() {
 			var scrollInfo = null
@@ -261,7 +266,7 @@
 				event.stopPropagation()
 			}
 		},
-		trigger: function(type, event) {
+		emit: function(type, event) {
 			var listener = this.props[type]
 			if (!isFunction(listener)) {
 				return
@@ -271,27 +276,35 @@
 			}, this.state)
 			return listener.call(this, syntheticEvent)
 		},
+		getDampingValue: function(value, damping) {
+			if (isFunction(damping)) {
+				return damping(value)
+			}
+			if (isNumber(damping)) {
+				return value / damping
+			}
+			return value
+		},
 		handleStart: function(event) {
-			// prevent the other fingers touch event
 			if (this.isTouching) {
 				return
 			}
 			var coor = getCoor(event)
-			var scrollInfo = this.getScrollInfo()
-			this.state = extend({}, defaultState, scrollInfo, {
+			this.state = extend({}, defaultState, this.getScrollInfo(), {
 				startX: coor.x,
 				startY: coor.y,
 			})
-			var result = this.trigger('onTouchStart', event)
+			var result = this.emit('onTouchStart', event)
 			if (result === false) {
 				return
 			}
 			this.stopPropagationIfNeed(event)
 			this.isTouching = true
-			addEvent(this.document, 'touchmove', this.handleMove)
-			addEvent(this.document, 'touchend', this.handleEnd)
 		},
 		handleMove: function(event) {
+			if (!this.isTouching) {
+				return
+			}
 			var coor = getCoor(event)
 			var props = this.props
 			var state = this.state
@@ -318,6 +331,7 @@
 				startX = moveX
 				offsetX = 0
 				directionX = ''
+				event.preventDefault()
 			}
 
 			// first time hit the y axis ending
@@ -325,26 +339,27 @@
 				startY = moveY
 				offsetY = 0
 				directionY = ''
+				event.preventDefault()
 			}
 
 			var translateX = 0
 			var translateY = 0
-			var damp = props.damp
+			var damping = props.damping
 
 			if (state.isScrollLeftEnd && offsetX > 0) {
 				directionX = 'left'
-				translateX = offsetX / damp.left
+				translateX = this.getDampingValue(offsetX, damping.left)
 			} else if (state.isScrollRightEnd && offsetX < 0) {
 				directionX = 'right'
-				translateX = offsetX / damp.right
+				translateX = this.getDampingValue(offsetX, damping.right)
 			}
 
 			if (state.isScrollTopEnd && offsetY > 0) {
 				directionY = 'top'
-				translateY = offsetY / damp.top
+				translateY = this.getDampingValue(offsetY, damping.top)
 			} else if (state.isScrollBottomEnd && offsetY < 0) {
 				directionY = 'bottom'
-				translateY = offsetY / damp.bottom
+				translateY = this.getDampingValue(offsetY, damping.bottom)
 			}
 
 			if (!axis) {
@@ -365,7 +380,7 @@
 				axis: axis,
 			})
 
-			var result = this.trigger('onTouchMove', event)
+			var result = this.emit('onTouchMove', event)
 			if (result === false) {
 				return
 			}
@@ -391,14 +406,16 @@
 			})
 		},
 		handleEnd: function(event) {
+			if (!this.isTouching) {
+				return
+			}
 			this.isTouching = false
-			removeEvent(this.document, 'touchmove', this.handleMove)
-			removeEvent(this.document, 'touchend', this.handleEnd)
 
-			var result = this.trigger('onTouchEnd', event)
+			var result = this.emit('onTouchEnd', event)
 			if (result === false) {
 				return
 			}
+
 			var state = this.state
 			if (state.directionX || state.directionY) {
 				if (isThenable(result)) {
@@ -411,5 +428,4 @@
 	})
 
 	return VirtualViewport
-
 }));

@@ -2,7 +2,7 @@
   "name": "virtual-viewport",
   "version": "1.0.0",
   "description": "Make an element scrolls like a viewport which has outer scroll",
-  "main": "index.js",
+  "main": "virtual-viewport.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

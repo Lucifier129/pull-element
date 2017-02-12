@@ -1,52 +1,52 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Viewport from '../../src/virtual-viewport'
+import Viewport from '../../'
 import './main.css'
 
 function App() {
     return (
-        <div>
+        <div className="app">
             <div className="info" >
                 you can drag me in x-axis
                 <div style={{width:'200%'}}>adf</div>
             </div>
             <div className="wrapper">
-                <div className="pull_refresh">
-                    <div className="pull">
-                        <div id="arrow" className="arrow">
-                            <img src="http://alloyteam.github.io/AlloyTouch/refresh/pull_refresh/asset/arrow.png" />
-                            <br />
+            <div className="pull_refresh">
+                        <div className="pull">
+                            <div id="arrow" className="arrow">
+                                <img src="http://alloyteam.github.io/AlloyTouch/refresh/pull_refresh/asset/arrow.png" />
+                                <br />
+                            </div>
+                        </div>
+                         <div className="loading">
+                            <svg width='40px' height='40px' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" className="uil-default">
+                                <rect x="0" y="0" width="100" height="100" fill="none" className="bk"></rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(0 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(30 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.08333333333333333s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(60 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.16666666666666666s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(90 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.25s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(120 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.3333333333333333s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(150 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.4166666666666667s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(180 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.5s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(210 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.5833333333333334s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(240 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.6666666666666666s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(270 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.75s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(300 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.8333333333333334s' repeatCount='indefinite' />
+                                </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(330 50 50) translate(0 -30)'>
+                                    <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.9166666666666666s' repeatCount='indefinite' />
+                                </rect></svg>
                         </div>
                     </div>
-                     <div className="loading">
-                        <svg width='40px' height='40px' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" className="uil-default">
-                            <rect x="0" y="0" width="100" height="100" fill="none" className="bk"></rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(0 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(30 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.08333333333333333s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(60 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.16666666666666666s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(90 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.25s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(120 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.3333333333333333s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(150 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.4166666666666667s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(180 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.5s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(210 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.5833333333333334s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(240 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.6666666666666666s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(270 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.75s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(300 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.8333333333333334s' repeatCount='indefinite' />
-                            </rect><rect x='46.5' y='40' width='7' height='20' rx='5' ry='5' fill='#00a9f2' transform='rotate(330 50 50) translate(0 -30)'>
-                                <animate attributeName='opacity' from='1' to='0' dur='1s' begin='0.9166666666666666s' repeatCount='indefinite' />
-                            </rect></svg>
-                    </div>
-                </div>
                 <div className="list">
                     {
                         Array.from({length: 30}).map(
@@ -75,7 +75,7 @@ const viewport = new Viewport({
     scroller: 'body',
     bottom: true,
     detectScroll: true,
-    onTouchMove({ offsetY, isScrollTopEnd, }) {
+    onTouchMove({ offsetY, isScrollTopEnd }) {
         if (!isScrollTopEnd) {
             return
         }
@@ -85,17 +85,17 @@ const viewport = new Viewport({
             arrow.classList.remove('arrow_up')
         }
     },
-    onTouchEnd({ offsetY, isScrollTopEnd }) {
+    async onTouchEnd({ offsetY, isScrollTopEnd }) {
         if (!isScrollTopEnd) {
             return
         }
         if (offsetY > 100) {
             pull_refresh.classList.add("refreshing")
             this.animateTo({x: 0, y: 40})
-            this.removeEvent()
-            return mockRequest().then(() => {
-                this.addEvent()
-            })
+            this.disable()
+            await mockRequest()
+            this.enable()
+            return
         }
         arrow.classList.remove('arrow_up')
     }
@@ -116,9 +116,9 @@ function mockRequest(viewport) {
 let count = 1
 
 function updateList() {
-    let list = document.querySelector('.list')
+    let list = document.querySelectorAll('.list .item')
     let curCount = count++
-    Array.from(list.children).forEach((node, index) => node.textContent = index + curCount)
+    Array.from(list).forEach((node, index) => node.textContent = index + curCount)
 }
 
 viewport.init()
@@ -127,8 +127,29 @@ const viewport1 = new Viewport({
     target: '.info',
     // isStatic: true,
     damp: 1,
-    // detectScroll: true,
+    detectScroll: true,
     right: true,
 })
 
 viewport1.init()
+
+ function damping(value) {
+     var step = [20, 40, 60, 80, 100];
+     var rate = [0.5, 0.4, 0.3, 0.2, 0.1];
+
+     var scaleedValue = value;
+     var valueStepIndex = step.length;
+
+     while (valueStepIndex--) {
+         if (value > step[valueStepIndex]) {
+             scaleedValue = (value - step[valueStepIndex]) * rate[valueStepIndex];
+             for (var i = valueStepIndex; i > 0; i--) {
+                 scaleedValue += (step[i] - step[i - 1]) * rate[i - 1];
+             }
+             scaleedValue += step[0] * 1;
+             break;
+         }
+     }
+
+     return scaleedValue;
+ };
