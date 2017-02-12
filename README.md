@@ -1,2 +1,2 @@
 # virtual-viewport
-Make an element scrolls like a viewport which has outer scroll
+Make an element has outer-scroll like a viewport
