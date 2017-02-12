@@ -2,7 +2,7 @@
   "name": "doc",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/resource/test",
+  "homepage": "/virtual-viewport/doc/build",
   "devDependencies": {
     "react-scripts": "0.8.5"
   },
