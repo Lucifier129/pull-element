@@ -173,10 +173,13 @@
 		isStatic: false,
 		drag: false,
 		detectScroll: false,
+		fixed: true,
 		transitionProperty: 'transform',
 		transitionDuration: '0.3s',
 		transitionTimingFunction: 'ease-out',
 	}
+
+	var isSupportPromise = typeof Promise === 'function'
 
 	function VirtualViewport(options) {
 		this.options = options
@@ -188,10 +191,11 @@
 		this.scroller = null
 		this.trigger = null
 		this.isTouching = false
-		this.handleStart = this.handleStart.bind(this)
-		this.handleMove = this.handleMove.bind(this)
-		this.handleEnd = this.handleEnd.bind(this)
-		this.animateToOrigin = this.animateToOrigin.bind(this)
+		this.isPreventDefault = false
+		this.preventDefault = this.preventDefault.bind(this)
+		this.handleTouchStart = this.handleTouchStart.bind(this)
+		this.handleTouchMove = this.handleTouchMove.bind(this)
+		this.handleTouchEnd = this.handleTouchEnd.bind(this)
 	}
 
 	extend(VirtualViewport.prototype, {
@@ -249,33 +253,66 @@
 			var translateStyle = getTranslateStyle(position)
 			var transitionStyle = {
 				transition: '',
+				webkitTransition: '',
 			}
 			extend(this.target.style, transitionStyle, translateStyle, otherStyle)
 		},
-		animateTo: function(position, otherStyle) {
+		animateTo: function(position, otherStyle, callback) {
+			if (isFunction(otherStyle)) {
+				callback = otherStyle
+				otherStyle = null
+			}
+			var context = this
 			var props = this.props
+			var target = this.target
 			var translateStyle = getTranslateStyle(position)
 			var transitionStyle = {
 				transitionProperty: props.transitionProperty,
 				transitionDuration: props.transitionDuration,
 				transitionTimingFunction: props.transitionTimingFunction,
+				webkitTransitionProperty: props.transitionProperty,
+				webkitTransitionDuration: props.transitionDuration,
+				webkitTransitionTimingFunction: props.transitionTimingFunction,
 			}
-			extend(this.target.style, transitionStyle, translateStyle, otherStyle)
+			var addTransitionEndListener = function(resolve) {
+				var handleTransitionEnd = function(event) {
+					context.handleTransitionEnd(event)
+					callback && callback(event)
+					resolve && resolve(event)
+					removeEvent(target, 'transitionend', handleTransitionEnd)
+					removeEvent(target, 'webkitTransitionEnd',handleTransitionEnd)
+				}
+				addEvent(target, 'transitionend', handleTransitionEnd)
+				addEvent(target, 'webkitTransitionEnd',handleTransitionEnd)
+				extend(target.style, transitionStyle, translateStyle, otherStyle)
+			}
+			if (isSupportPromise) {
+				return new Promise(addTransitionEndListener)
+			}
+			addTransitionEndListener()
 		},
-		animateToOrigin: function(otherStyle) {
-			this.animateTo({ x: 0, y: 0 }, otherStyle)
+		animateToOrigin: function(otherStyle, callback) {
+			if (isFunction(otherStyle)) {
+				callback = otherStyle
+				otherStyle = null
+			}
+			this.isAnimateToOrigin = true
+			return this.animateTo({ x: 0, y: 0 }, otherStyle, callback)
 		},
 		enable: function() {
-			addEvent(this.trigger, 'touchstart', this.handleStart)
-			addEvent(this.document, 'touchmove', this.handleMove)
-			addEvent(this.document, 'touchend', this.handleEnd)
+			addEvent(this.trigger, 'touchstart', this.handleTouchStart)
+			addEvent(this.document, 'touchmove', this.handleTouchMove)
+			addEvent(this.document, 'touchend', this.handleTouchEnd)
 		},
 		disable: function() {
-			removeEvent(this.trigger, 'touchstart', this.handleStart)
-			removeEvent(this.document, 'touchmove', this.handleMove)
-			removeEvent(this.document, 'touchend', this.handleEnd)
+			removeEvent(this.trigger, 'touchstart', this.handleTouchStart)
+			removeEvent(this.document, 'touchmove', this.handleTouchMove)
+			removeEvent(this.document, 'touchend', this.handleTouchEnd)
 		},
-		getScrollInfo: function() {
+		preventDefault: function() {
+			this.isPreventDefault = true
+		},
+ 		getScrollInfo: function() {
 			var scrollInfo = null
 			if (this.isGlobalScroller) {
 				scrollInfo = getGlobalScrllInfo(this.document)
@@ -319,10 +356,30 @@
 			}
 
 			var currentScrollInfo = this.getScrollInfo()
-
 			for (var i = 0; i < list.length; i++) {
 				var name = list[i]
 				state[name] = currentScrollInfo[name]
+			}
+		},
+		setFixedStyleIfNeed: function() {
+			var props = this.props
+			if (!props.isStatic && props.fixed) {
+				var state = this.state
+				extend(this.scroller.style, {
+					width: state.scrollWidth + 'px',
+					height: state.scrollHeight + 'px',
+					overflow: 'hidden',
+				})
+			}
+		},
+		clearFixedStyleIfNeed: function() {
+			var props = this.props
+			if (!props.isStatic && props.fixed) {
+				extend(this.scroller.style, {
+					width: '',
+					height: '',
+					overflow: '',
+				})
 			}
 		},
 		emit: function(type, event) {
@@ -330,12 +387,9 @@
 			if (!isFunction(listener)) {
 				return
 			}
-			var syntheticEvent = extend({
-				nativeEvent: event
-			}, this.state)
-			return listener.call(this, syntheticEvent)
+			return listener.call(this, this.state, event)
 		},
-		handleStart: function(event) {
+		handleTouchStart: function(event) {
 			if (this.isTouching) {
 				return
 			}
@@ -344,14 +398,15 @@
 				startX: coor.x,
 				startY: coor.y,
 			})
-			var result = this.emit('onTouchStart', event)
-			if (result === false) {
+			this.emit('onTouchStart', event)
+			if (this.isPreventDefault) {
+				this.isPreventDefault = false
 				return
 			}
 			this.stopPropagationIfNeed(event)
 			this.isTouching = true
 		},
-		handleMove: function(event) {
+		handleTouchMove: function(event) {
 			if (!this.isTouching) {
 				return
 			}
@@ -364,7 +419,9 @@
 			var moveY = coor.y
 			var offsetX = moveX - startX
 			var offsetY = moveY - startY
+			var type = state.type
 			var axis = state.axis
+			var direction = state.direction
 			var directionX = state.directionX
 			var directionY = state.directionY
 			var isScrollTopEnd = state.isScrollTopEnd
@@ -374,35 +431,43 @@
 
 			this.detectScrollIfNeed()
 
+			// first hit the x axis ending
 			if (!isScrollLeftEnd && state.isScrollLeftEnd || !isScrollRightEnd && state.isScrollRightEnd) {
 				offsetX = 0
 				startX = moveX
 			}
 
+			// first hit the y axis ending
 			if (!isScrollTopEnd && state.isScrollTopEnd || !isScrollBottomEnd && state.isScrollBottomEnd) {
 				offsetY = 0
 				startY = moveY
-			}
-
-			if (state.isScrollLeftEnd && offsetX > 0) {
-				directionX = 'left'
-			} else if (state.isScrollRightEnd && offsetX < 0) {
-				directionX = 'right'
-			}
-
-			if (state.isScrollTopEnd && offsetY > 0) {
-				directionY = 'top'
-			} else if (state.isScrollBottomEnd && offsetY < 0) {
-				directionY = 'bottom'
 			}
 
 			if (!axis) {
 				axis = Math.abs(offsetY) >= Math.abs(offsetX) ? 'y' : 'x'
 			}
 
+			if (axis === 'y') {
+				if (state.isScrollTopEnd && offsetY > 0) {
+					direction = 'top'
+					type = 'onPullDown'
+				} else if (state.isScrollBottomEnd && offsetY < 0) {
+					direction = 'bottom'
+					type = 'onPullUp'
+				}
+			} else if (axis === 'x') {
+				if (state.isScrollLeftEnd && offsetX > 0) {
+					direction = 'right'
+					type = 'onPullLeft'
+				} else if (state.isScrollRightEnd && offsetX < 0) {
+					direction = 'left'
+					type = 'onPullRight'
+				}
+			}
+
 			var damping = props.damping
-			var translateX = transformValueByDamping(offsetX, damping[directionX])
-			var translateY = transformValueByDamping(offsetY, damping[directionX])
+			var translateX = transformValueByDamping(offsetX, damping[direction])
+			var translateY = transformValueByDamping(offsetY, damping[direction])
 
 			this.setState({
 				startX: startX,
@@ -411,72 +476,60 @@
 				moveY: moveY,
 				offsetX: offsetX,
 				offsetY: offsetY,
-				directionX: directionX,
-				directionY: directionY,
 				translateX: translateX,
 				translateY: translateY,
+				direction: direction,
 				axis: axis,
+				type: type,
 			})
 
-			var result = this.emit('onTouchMove', event)
-			if (result === false) {
-				return
-			}
-
-			if (!directionX && !directionY) {
+			if (!direction) {
 				return
 			}
 
 			if (!props.drag) {
-				if (axis === 'y' && props[directionY]) {
+				if (axis === 'y' && (props[type] || props[direction])) {
 					translateX = 0
-				} else if (axis === 'x' && props[directionX]) {
+				} else if (axis === 'x' && (props[type] || props[direction])) {
 					translateY = 0
 				} else {
 					return
 				}
 			}
 
-			if (!props.isStatic && props.fixed) {
-				extend(this.scroller.style, {
-					width: state.scrollWidth + 'px',
-					height: state.scrollHeight + 'px',
-					overflow: 'hidden',
-				})
+			this.emit(type, event)
+			if (this.isPreventDefault) {
+				this.isPreventDefault = false
+				return
 			}
 
 			event.preventDefault()
+
+			this.setFixedStyleIfNeed()
 			this.setTranslate({
 				x: translateX,
 				y: translateY,
 			})
+			
 		},
-		handleEnd: function(event) {
+		handleTouchEnd: function(event) {
 			if (!this.isTouching) {
 				return
 			}
 			this.isTouching = false
-
-			if (!this.props.isStatic && this.props.fixed) {
-				extend(this.scroller.style, {
-					width: '',
-					height: '',
-					overflow: '',
-				})
-			}
-
-			var result = this.emit('onTouchEnd', event)
-			if (result === false) {
+			this.emit(this.state.type + 'End', event)
+			if (this.isPreventDefault) {
+				this.isPreventDefault = false
 				return
 			}
-
-			var state = this.state
-			if (state.directionX || state.directionY) {
-				if (isThenable(result)) {
-					result.then(this.animateToOrigin)
-				} else {
-					this.animateToOrigin()
-				}
+			this.animateToOrigin()
+		},
+		handleTransitionEnd: function(event) {
+			this.emit('onTransitionEnd', event)
+			if (this.isAnimateToOrigin) {
+				this.isAnimateToOrigin = false
+				this.emit('onOrigin', event)
+				this.clearFixedStyleIfNeed()
 			}
 		},
 	})

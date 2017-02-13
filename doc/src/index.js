@@ -74,46 +74,44 @@ const pull_up =  document.querySelector('.pull-up')
 const viewport = new Viewport({
     target: '.wrapper',
     scroller: 'body',
-    top: true,
-    bottom: true,
-    left: true,
-    right: true,
     detectScroll: true,
     fixed: true,
-    onTouchMove({ offsetY, translateY, directionY, isScrollTopEnd, isScrollBottomEnd, scrollHeight }) {
-        if (isScrollTopEnd) {
-            if (offsetY > 100) {
-                arrow.classList.add('arrow_up')
-            } else {
-                arrow.classList.remove('arrow_up')
-            }
-        }
-        if (isScrollBottomEnd) {
-            Object.assign(pull_up.style, {
-                transition: '',
-                height: Math.min(Math.abs(translateY), 40) + 'px',
-            })
+    onPullUp({ translateY }) {
+        Object.assign(pull_up.style, {
+            transition: '',
+            height: Math.min(Math.abs(translateY), 40) + 'px',
+        })
+    },
+    onPullUpEnd() {
+       
+    },
+    onOrigin({ type }) {
+        console.log(type)
+        Object.assign(pull_up.style, {
+            transition: '',
+            height: 0,
+        })
+    },
+    onPullDown({ offsetY }) {
+        if (offsetY > 100) {
+            arrow.classList.add('arrow_up')
+        } else {
+            arrow.classList.remove('arrow_up')
         }
     },
-    async onTouchEnd({ offsetY, isScrollTopEnd, isScrollBottomEnd }) {
-        if (isScrollTopEnd) {
-            if (offsetY > 100) {
-                pull_refresh.classList.add("refreshing")
-                this.animateTo({x: 0, y: 40})
-                this.disable()
-                await mockRequest()
-                this.enable()
-            } else {
-                arrow.classList.remove('arrow_up')
-            }
+    async onPullDownEnd({ offsetY }) {
+       if (offsetY > 100) {
+            this.preventDefault()
+            pull_refresh.classList.add("refreshing")
+            this.animateTo({x: 0, y: 40})
+            this.disable()
+            await mockRequest()
+            await this.animateToOrigin()
+            this.enable()
+        } else {
+            arrow.classList.remove('arrow_up')
         }
-        if (isScrollBottomEnd) {
-            Object.assign(pull_up.style, {
-                transition: 'height 0.3s ease-in',
-                height: 0,
-            })
-        }
-    }
+    },
 })
 
 function mockRequest(viewport) {
