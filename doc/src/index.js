@@ -76,6 +76,7 @@ const viewport = new Viewport({
     scroller: 'body',
     detectScroll: true,
     fixed: true,
+    // drag: true,
     onPullUp({ translateY }) {
         Object.assign(pull_up.style, {
             transition: '',
@@ -86,7 +87,6 @@ const viewport = new Viewport({
        
     },
     onOrigin({ type }) {
-        console.log(type)
         Object.assign(pull_up.style, {
             transition: '',
             height: 0,
@@ -100,17 +100,14 @@ const viewport = new Viewport({
         }
     },
     async onPullDownEnd({ offsetY }) {
-       if (offsetY > 100) {
-            this.preventDefault()
-            pull_refresh.classList.add("refreshing")
-            this.animateTo({x: 0, y: 40})
-            this.disable()
-            await mockRequest()
-            await this.animateToOrigin()
-            this.enable()
-        } else {
-            arrow.classList.remove('arrow_up')
+        if (offsetY <= 100) {
+            return
         }
+        this.preventDefault()
+        pull_refresh.classList.add("refreshing")
+        this.animateTo({x: 0, y: 40})
+        await mockRequest()
+        await this.animateToOrigin()
     },
 })
 
@@ -142,6 +139,7 @@ const viewport1 = new Viewport({
     damp: 1,
     detectScroll: true,
     right: true,
+    fixed: true,
 })
 
 viewport1.init()
