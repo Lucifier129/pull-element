@@ -119,6 +119,16 @@
 		return isNumber(damping) || isFunction(damping) ? damping : defaultDamping
 	}
 
+	function transformValueByDamping(value, damping) {
+		if (isFunction(damping)) {
+			return damping(value)
+		}
+		if (isNumber(damping)) {
+			return value / damping
+		}
+		return value
+	}
+
 	var staticScrollStatus = {
 		isScrollTopEnd: true,
 		isScrollLeftEnd: true,
@@ -169,8 +179,14 @@
 	}
 
 	function VirtualViewport(options) {
-		this.props = extend({}, defaultProps, options)
+		this.options = options
 		this.state = extend({}, defaultState)
+		this.data = null
+		this.props = null
+		this.document = null
+		this.target = null
+		this.scroller = null
+		this.trigger = null
 		this.isTouching = false
 		this.handleStart = this.handleStart.bind(this)
 		this.handleMove = this.handleMove.bind(this)
@@ -180,47 +196,61 @@
 
 	extend(VirtualViewport.prototype, {
 		init: function() {
-			var props = this.props
+			var options = this.options
 			var doc = this.document = window.document
-			var target = this.target = getElem(props.target)
-			var scroller = this.scroller = props.scroller ? getElem(props.scroller) : target
-			this.trigger = props.trigger ? getElem(props.trigger) : target
+			var target = this.target = getElem(options.target)
+			var scroller = this.scroller = options.scroller ? getElem(options.scroller) : target
+			this.trigger = options.trigger ? getElem(options.trigger) : target
 			this.isGlobalScroller = scroller === doc.body || scroller === window || scroller === doc
-			this.setDampingProp()
+			this.data = {}
+			this.props = extend({}, defaultProps, this.options, {
+				damping: this.getDamping()
+			})
 			this.enable()
 		},
 		destroy: function() {
 			this.disable()
+			this.props = null
+			this.data = null
 			this.document = null
 			this.target = null
 			this.scroller = null
 			this.trigger = null
 		},
-		setDampingProp: function() {
-			var damping = this.props.damping
-			if (isNumber(damping) || isFunction(damping)) {
-				this.props.damping = {
-					left: damping,
-					right: damping,
-					top: damping,
-					bottom: damping,
+		setState: function(newState) {
+			extend(this.state, newState)
+		},
+		setData: function(newData) {
+			extend(this.data, newData)
+		},
+		getDamping: function() {
+			var defaultDamping = defaultProps.damping
+			var dampingOption = this.options.damping
+			var damping = null
+			if (isObject(dampingOption)) {
+				damping = {
+					left: getDampingValue(dampingOption.left, defaultDamping),
+					right: getDampingValue(dampingOption.right, defaultDamping),
+					top: getDampingValue(dampingOption.top, defaultDamping),
+					bottom: getDampingValue(dampingOption.bottom, defaultDamping),
 				}
-			} else if (isObject(damping)) {
-				var defaultDamping = defaultProps.damping
-				this.props.damping = {
-					left: getDampingValue(damping.left, defaultDamping),
-					right: getDampingValue(damping.right, defaultDamping),
-					top: getDampingValue(damping.top, defaultDamping),
-					bottom: getDampingValue(damping.bottom, defaultDamping),
+			} else {
+				var dampingValue = getDampingValue(dampingOption, defaultDamping)
+				damping = {
+					left: dampingValue,
+					right: dampingValue,
+					top: dampingValue,
+					bottom: dampingValue,
 				}
 			}
+			return damping
 		},
-		setTranslate: function(position) {
+		setTranslate: function(position, otherStyle) {
 			var translateStyle = getTranslateStyle(position)
 			var transitionStyle = {
 				transition: '',
 			}
-			extend(this.target.style, transitionStyle, translateStyle)
+			extend(this.target.style, transitionStyle, translateStyle, otherStyle)
 		},
 		animateTo: function(position, otherStyle) {
 			var props = this.props
@@ -233,11 +263,7 @@
 			extend(this.target.style, transitionStyle, translateStyle, otherStyle)
 		},
 		animateToOrigin: function(otherStyle) {
-			var position = {
-				x: 0,
-				y: 0,
-			}
-			this.animateTo(position, otherStyle)
+			this.animateTo({ x: 0, y: 0 }, otherStyle)
 		},
 		enable: function() {
 			addEvent(this.trigger, 'touchstart', this.handleStart)
@@ -266,6 +292,39 @@
 				event.stopPropagation()
 			}
 		},
+		detectScrollIfNeed: function() {
+			var props = this.props
+
+			if (props.isStatic || !props.detectScroll) {
+				return
+			}
+
+			var state = this.state
+			var list = []
+
+			if (!state.isScrollLeftEnd && props.left) {
+				list.push('isScrollLeftEnd')
+			}
+			if (!state.isScrollRightEnd && props.right) {
+				list.push('isScrollRightEnd')
+			}
+			if (!state.isScrollTopEnd && props.top) {
+				list.push('isScrollTopEnd')
+			}
+			if (!state.isScrollBottomEnd && props.bottom) {
+				list.push('isScrollBottomEnd')
+			}
+			if (!list.length) {
+				return
+			}
+
+			var currentScrollInfo = this.getScrollInfo()
+
+			for (var i = 0; i < list.length; i++) {
+				var name = list[i]
+				state[name] = currentScrollInfo[name]
+			}
+		},
 		emit: function(type, event) {
 			var listener = this.props[type]
 			if (!isFunction(listener)) {
@@ -275,15 +334,6 @@
 				nativeEvent: event
 			}, this.state)
 			return listener.call(this, syntheticEvent)
-		},
-		getDampingValue: function(value, damping) {
-			if (isFunction(damping)) {
-				return damping(value)
-			}
-			if (isNumber(damping)) {
-				return value / damping
-			}
-			return value
 		},
 		handleStart: function(event) {
 			if (this.isTouching) {
@@ -317,56 +367,44 @@
 			var axis = state.axis
 			var directionX = state.directionX
 			var directionY = state.directionY
-			var isScrollLeftEnd = state.isScrollLeftEnd
-			var isScrollRightEnd = state.isScrollRightEnd
 			var isScrollTopEnd = state.isScrollTopEnd
 			var isScrollBottomEnd = state.isScrollBottomEnd
+			var isScrollLeftEnd = state.isScrollLeftEnd
+			var isScrollRightEnd = state.isScrollRightEnd
 
-			if (props.detectScroll) {
-				extend(this.state, this.getScrollInfo())
-			}
+			this.detectScrollIfNeed()
 
-			// first time hit the a axis ending
 			if (!isScrollLeftEnd && state.isScrollLeftEnd || !isScrollRightEnd && state.isScrollRightEnd) {
-				startX = moveX
 				offsetX = 0
-				directionX = ''
-				event.preventDefault()
+				startX = moveX
 			}
 
-			// first time hit the y axis ending
 			if (!isScrollTopEnd && state.isScrollTopEnd || !isScrollBottomEnd && state.isScrollBottomEnd) {
-				startY = moveY
 				offsetY = 0
-				directionY = ''
-				event.preventDefault()
+				startY = moveY
 			}
-
-			var translateX = 0
-			var translateY = 0
-			var damping = props.damping
 
 			if (state.isScrollLeftEnd && offsetX > 0) {
 				directionX = 'left'
-				translateX = this.getDampingValue(offsetX, damping.left)
 			} else if (state.isScrollRightEnd && offsetX < 0) {
 				directionX = 'right'
-				translateX = this.getDampingValue(offsetX, damping.right)
 			}
 
 			if (state.isScrollTopEnd && offsetY > 0) {
 				directionY = 'top'
-				translateY = this.getDampingValue(offsetY, damping.top)
 			} else if (state.isScrollBottomEnd && offsetY < 0) {
 				directionY = 'bottom'
-				translateY = this.getDampingValue(offsetY, damping.bottom)
 			}
 
 			if (!axis) {
 				axis = Math.abs(offsetY) >= Math.abs(offsetX) ? 'y' : 'x'
 			}
 
-			extend(this.state, {
+			var damping = props.damping
+			var translateX = transformValueByDamping(offsetX, damping[directionX])
+			var translateY = transformValueByDamping(offsetY, damping[directionX])
+
+			this.setState({
 				startX: startX,
 				startY: startY,
 				moveX: moveX,
@@ -399,6 +437,14 @@
 				}
 			}
 
+			if (!props.isStatic && props.fixed) {
+				extend(this.scroller.style, {
+					width: state.scrollWidth + 'px',
+					height: state.scrollHeight + 'px',
+					overflow: 'hidden',
+				})
+			}
+
 			event.preventDefault()
 			this.setTranslate({
 				x: translateX,
@@ -410,6 +456,14 @@
 				return
 			}
 			this.isTouching = false
+
+			if (!this.props.isStatic && this.props.fixed) {
+				extend(this.scroller.style, {
+					width: '',
+					height: '',
+					overflow: '',
+				})
+			}
 
 			var result = this.emit('onTouchEnd', event)
 			if (result === false) {

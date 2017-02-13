@@ -69,35 +69,50 @@ ReactDOM.render(<App />, rootElem)
 
 const arrow = document.querySelector("#arrow")
 const pull_refresh = document.querySelector(".pull_refresh")
+const pull_up =  document.querySelector('.pull-up')
 
 const viewport = new Viewport({
     target: '.wrapper',
     scroller: 'body',
+    top: true,
     bottom: true,
+    left: true,
+    right: true,
     detectScroll: true,
-    onTouchMove({ offsetY, isScrollTopEnd }) {
-        if (!isScrollTopEnd) {
-            return
+    fixed: true,
+    onTouchMove({ offsetY, translateY, directionY, isScrollTopEnd, isScrollBottomEnd, scrollHeight }) {
+        if (isScrollTopEnd) {
+            if (offsetY > 100) {
+                arrow.classList.add('arrow_up')
+            } else {
+                arrow.classList.remove('arrow_up')
+            }
         }
-        if (offsetY > 100) {
-            arrow.classList.add('arrow_up')
-        } else {
-            arrow.classList.remove('arrow_up')
+        if (isScrollBottomEnd) {
+            Object.assign(pull_up.style, {
+                transition: '',
+                height: Math.min(Math.abs(translateY), 40) + 'px',
+            })
         }
     },
-    async onTouchEnd({ offsetY, isScrollTopEnd }) {
-        if (!isScrollTopEnd) {
-            return
+    async onTouchEnd({ offsetY, isScrollTopEnd, isScrollBottomEnd }) {
+        if (isScrollTopEnd) {
+            if (offsetY > 100) {
+                pull_refresh.classList.add("refreshing")
+                this.animateTo({x: 0, y: 40})
+                this.disable()
+                await mockRequest()
+                this.enable()
+            } else {
+                arrow.classList.remove('arrow_up')
+            }
         }
-        if (offsetY > 100) {
-            pull_refresh.classList.add("refreshing")
-            this.animateTo({x: 0, y: 40})
-            this.disable()
-            await mockRequest()
-            this.enable()
-            return
+        if (isScrollBottomEnd) {
+            Object.assign(pull_up.style, {
+                transition: 'height 0.3s ease-in',
+                height: 0,
+            })
         }
-        arrow.classList.remove('arrow_up')
     }
 })
 

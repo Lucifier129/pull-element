@@ -1,20 +1,25 @@
 {
   "name": "virtual-viewport",
-  "version": "1.0.0",
-  "description": "Make an element scrolls like a viewport which has outer scroll",
+  "version": "1.1.0",
+  "description": "Make an element has outer-scroll like a viewport",
   "main": "virtual-viewport.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "uglifyjs virtual-viewport.js --compress --mangle  --output virtual-viewport.min.js",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lucifier129/virtual-viewport.git"
   },
-  "keywords": [],
+  "keywords": ["pull-to-refresh", "touch", "swipe", "drag"],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Lucifier129/virtual-viewport/issues"
   },
-  "homepage": "https://github.com/Lucifier129/virtual-viewport#readme"
+  "homepage": "https://github.com/Lucifier129/virtual-viewport#readme",
+  "devDependencies": {
+    "uglify-js": "^2.7.5"
+  }
 }
