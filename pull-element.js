@@ -2,6 +2,7 @@
  * pull-element.js
  * (c) 2017 Jade Gu
  * Released under the MIT License.
+ * https://github.com/Lucifier129/pull-element
  */
 (function(global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
