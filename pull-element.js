@@ -22,10 +22,6 @@
 		return target
 	}
 
-	function isThenable(obj) {
-		return obj != null && typeof obj.then === 'function'
-	}
-
 	function isNumber(obj) {
 		return typeof obj === 'number' && !isNaN(obj)
 	}
@@ -100,11 +96,11 @@
 	}
 
 	function addEvent(elem, type, handler) {
-		elem.addEventListener(type, handler)
+		elem && elem.addEventListener(type, handler)
 	}
 
 	function removeEvent(elem, type, handler) {
-		elem.removeEventListener(type, handler)
+		elem && elem.removeEventListener(type, handler)
 	}
 
 	function getCoor(event) {
@@ -248,6 +244,9 @@
 			return damping
 		},
 		setTranslate: function(position, otherStyle) {
+			if (!this.target) {
+				return
+			}
 			var translateStyle = getTranslateStyle(position)
 			var transitionStyle = {
 				transition: '',
@@ -256,13 +255,16 @@
 			extend(this.target.style, transitionStyle, translateStyle, otherStyle)
 		},
 		animateTo: function(position, otherStyle, callback) {
+			if (!this.target) {
+				return
+			}
 			if (isFunction(otherStyle)) {
 				callback = otherStyle
 				otherStyle = null
 			}
+			var target = this.target
 			var context = this
 			var props = this.props
-			var target = this.target
 			var translateStyle = getTranslateStyle(position)
 			var transitionStyle = {
 				transitionProperty: props.transitionProperty,
@@ -273,16 +275,26 @@
 				webkitTransitionTimingFunction: props.transitionTimingFunction,
 			}
 			var addTransitionEndListener = function(resolve) {
-				var handleTransitionEnd = function(event) {
-					callback && callback(event)
-					resolve && resolve(event)
-					context.handleTransitionEnd(event)
+				var isCalled = false
+				var handleTransitionEnd = function() {
+					if (isCalled) {
+						return
+					}
+					callback && callback()
+					resolve && resolve()
 					removeEvent(target, 'transitionend', handleTransitionEnd)
 					removeEvent(target, 'webkitTransitionEnd',handleTransitionEnd)
 				}
 				addEvent(target, 'transitionend', handleTransitionEnd)
 				addEvent(target, 'webkitTransitionEnd',handleTransitionEnd)
 				extend(target.style, transitionStyle, translateStyle, otherStyle)
+				// in some browser, transitionend dose'nt work as expected
+				var transitionDuration = Number(props.transitionDuration.replace(/[^.\d]+/g, ''))
+				// transform 1s to 1000ms
+				if (/[\d\.]+s$/.test(props.transitionDuration)) {
+					transitionDuration = transitionDuration * 1000
+				}
+				setTimeout(handleTransitionEnd, transitionDuration)
 			}
 			if (isSupportPromise) {
 				return new Promise(addTransitionEndListener)
@@ -290,6 +302,9 @@
 			addTransitionEndListener()
 		},
 		animateToOrigin: function(otherStyle, callback) {
+			if (!this.target) {
+				return
+			}
 			if (isFunction(otherStyle)) {
 				callback = otherStyle
 				otherStyle = null
@@ -527,9 +542,6 @@
 				return
 			}
 			this.animateToOrigin()
-		},
-		handleTransitionEnd: function(event) {
-			this.emit('onTransitionEnd', event)
 		},
 	})
 

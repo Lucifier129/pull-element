@@ -75,8 +75,9 @@ const viewport = new Viewport({
     target: '.wrapper',
     scroller: 'body',
     detectScroll: true,
-    onPullUp() {
+    onPullUp({ translateY }) {
         pull_up.style.display = 'block'
+        pull_up.style.height = Math.min(-translateY, 40) + 'px'
     },
     onPullUpEnd() {
        
@@ -84,6 +85,7 @@ const viewport = new Viewport({
     onOrigin({ direction }) {
         if (direction === 'bottom') {
             pull_up.style.display = ''
+            pull_up.style.height = ''
         }
     },
     onPullDown({ translateY }) {
