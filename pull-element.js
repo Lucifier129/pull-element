@@ -264,7 +264,6 @@
 				otherStyle = null
 			}
 			var target = this.target
-			var context = this
 			var props = this.props
 			var translateStyle = getTranslateStyle(position)
 			var transitionStyle = {
@@ -281,6 +280,7 @@
 					if (isCalled) {
 						return
 					}
+					isCalled = true
 					callback && callback()
 					resolve && resolve()
 					removeEvent(target, 'transitionend', handleTransitionEnd)
@@ -312,10 +312,10 @@
 			}
 			var context = this
 			var finalCallback = function(event) {
-				context.emit('onOrigin', event)
-				callback && callback(event)
 				context.clearFixedStyleIfNeed()
 				context.isWaitForBackToOrigin = false
+				callback && callback(event)
+				context.emit('onOrigin', event)		
 			}
 			return this.animateTo({ x: 0, y: 0 }, otherStyle, finalCallback)
 		},

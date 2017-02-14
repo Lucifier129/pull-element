@@ -2,7 +2,7 @@
   "name": "doc",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/pull-element/build",
+  "homepage": "/pull-element/demo/build",
   "devDependencies": {
     "react-scripts": "0.8.5"
   },
