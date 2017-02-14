@@ -1,24 +1,24 @@
 {
-  "name": "virtual-viewport",
-  "version": "1.1.0",
-  "description": "Make an element has outer-scroll like a viewport",
-  "main": "virtual-viewport.js",
+  "name": "pull-element",
+  "version": "1.0.0",
+  "description": "Pull element in four directions",
+  "main": "pull-element.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "uglifyjs virtual-viewport.js --compress --mangle  --output virtual-viewport.min.js",
+    "build": "uglifyjs pull-element.js --compress --mangle  --output pull-element.min.js",
     "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Lucifier129/virtual-viewport.git"
+    "url": "git+https://github.com/Lucifier129/pull-element.git"
   },
   "keywords": ["pull-to-refresh", "touch", "swipe", "drag"],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Lucifier129/virtual-viewport/issues"
+    "url": "https://github.com/Lucifier129/pull-element/issues"
   },
-  "homepage": "https://github.com/Lucifier129/virtual-viewport#readme",
+  "homepage": "https://github.com/Lucifier129/pull-element#readme",
   "devDependencies": {
     "uglify-js": "^2.7.5"
   }

@@ -60,9 +60,10 @@ body {
 }
 
 .pull-up {
+    display: none;
     text-align: center;
     width: 100%;
-    height: 0;
+    height: 40px;
     overflow: hidden;
     color: #fff;
     background: red;

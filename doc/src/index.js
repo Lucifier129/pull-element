@@ -75,39 +75,33 @@ const viewport = new Viewport({
     target: '.wrapper',
     scroller: 'body',
     detectScroll: true,
-    fixed: true,
-    // drag: true,
-    onPullUp({ translateY }) {
-        Object.assign(pull_up.style, {
-            transition: '',
-            height: Math.min(Math.abs(translateY), 40) + 'px',
-        })
+    onPullUp() {
+        pull_up.style.display = 'block'
     },
     onPullUpEnd() {
        
     },
-    onOrigin({ type }) {
-        Object.assign(pull_up.style, {
-            transition: '',
-            height: 0,
-        })
+    onOrigin({ direction }) {
+        if (direction === 'bottom') {
+            pull_up.style.display = ''
+        }
     },
-    onPullDown({ offsetY }) {
-        if (offsetY > 100) {
+    onPullDown({ translateY }) {
+        if (translateY > 100) {
             arrow.classList.add('arrow_up')
         } else {
             arrow.classList.remove('arrow_up')
         }
     },
-    async onPullDownEnd({ offsetY }) {
-        if (offsetY <= 100) {
+    async onPullDownEnd({ translateY }) {
+        if (translateY <= 100) {
             return
         }
-        this.preventDefault()
         pull_refresh.classList.add("refreshing")
+        this.preventDefault()
         this.animateTo({x: 0, y: 40})
         await mockRequest()
-        await this.animateToOrigin()
+        this.animateToOrigin()
     },
 })
 
@@ -139,28 +133,6 @@ const viewport1 = new Viewport({
     damp: 1,
     detectScroll: true,
     right: true,
-    fixed: true,
 })
 
 viewport1.init()
-
- function damping(value) {
-     var step = [20, 40, 60, 80, 100];
-     var rate = [0.5, 0.4, 0.3, 0.2, 0.1];
-
-     var scaleedValue = value;
-     var valueStepIndex = step.length;
-
-     while (valueStepIndex--) {
-         if (value > step[valueStepIndex]) {
-             scaleedValue = (value - step[valueStepIndex]) * rate[valueStepIndex];
-             for (var i = valueStepIndex; i > 0; i--) {
-                 scaleedValue += (step[i] - step[i - 1]) * rate[i - 1];
-             }
-             scaleedValue += step[0] * 1;
-             break;
-         }
-     }
-
-     return scaleedValue;
- };

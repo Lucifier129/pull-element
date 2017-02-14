@@ -1,12 +1,12 @@
 /*!
- * virtual-viewport.js
+ * pull-element.js
  * (c) 2017 Jade Gu
  * Released under the MIT License.
  */
 (function(global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 		typeof define === 'function' && define.amd ? define(factory) :
-		global.VirtualViewport = factory();
+		global.PullElement = factory();
 }(this, function() {
 	'use strict';
 
@@ -136,6 +136,13 @@
 		isScrollRightEnd: true,
 	}
 
+	var eventMap = {
+		top: 'onPullDown',
+		bottom: 'onPullUp',
+		left: 'onPullRight',
+		right: 'onPullLeft',
+	}
+
 	var defaultState = {
 		scrollTop: 0,
 		scrollLeft: 0,
@@ -155,7 +162,7 @@
 		offsetY: 0,
 		translateX: 0,
 		translateY: 0,
-		type: '',
+		direction: '',
 		axis: '',
 	}
 
@@ -164,7 +171,6 @@
 		scroller: '',
 		trigger: '',
 		damping: 1.6,
-		stopPropagation: true,
 		top: false,
 		bottom: false,
 		left: false,
@@ -173,6 +179,7 @@
 		drag: false,
 		detectScroll: false,
 		fixed: true,
+		stopPropagation: true,
 		transitionProperty: 'transform',
 		transitionDuration: '0.3s',
 		transitionTimingFunction: 'ease-out',
@@ -180,7 +187,7 @@
 
 	var isSupportPromise = typeof Promise === 'function'
 
-	function VirtualViewport(options) {
+	function PullElement(options) {
 		this.options = options
 		this.state = extend({}, defaultState)
 		this.props = null
@@ -190,14 +197,14 @@
 		this.trigger = null
 		this.isTouching = false
 		this.isPreventDefault = false
-		this.isAnimateToOrigin = false
+		this.isWaitForBackToOrigin = false
 		this.preventDefault = this.preventDefault.bind(this)
 		this.handleTouchStart = this.handleTouchStart.bind(this)
 		this.handleTouchMove = this.handleTouchMove.bind(this)
 		this.handleTouchEnd = this.handleTouchEnd.bind(this)
 	}
 
-	extend(VirtualViewport.prototype, {
+	extend(PullElement.prototype, {
 		init: function() {
 			var options = this.options
 			var doc = this.document = window.document
@@ -267,9 +274,9 @@
 			}
 			var addTransitionEndListener = function(resolve) {
 				var handleTransitionEnd = function(event) {
-					context.handleTransitionEnd(event)
 					callback && callback(event)
 					resolve && resolve(event)
+					context.handleTransitionEnd(event)
 					removeEvent(target, 'transitionend', handleTransitionEnd)
 					removeEvent(target, 'webkitTransitionEnd',handleTransitionEnd)
 				}
@@ -287,7 +294,14 @@
 				callback = otherStyle
 				otherStyle = null
 			}
-			return this.animateTo({ x: 0, y: 0 }, otherStyle, callback)
+			var context = this
+			var finalCallback = function(event) {
+				context.emit('onOrigin', event)
+				callback && callback(event)
+				context.clearFixedStyleIfNeed()
+				context.isWaitForBackToOrigin = false
+			}
+			return this.animateTo({ x: 0, y: 0 }, otherStyle, finalCallback)
 		},
 		enable: function() {
 			addEvent(this.trigger, 'touchstart', this.handleTouchStart)
@@ -329,6 +343,7 @@
 			var state = this.state
 			var list = []
 
+			// only update the property which is needed
 			if (!state.isScrollLeftEnd && (props.left || props.onPullRight)) {
 				list.push('isScrollLeftEnd')
 			}
@@ -353,10 +368,9 @@
 		},
 		setFixedStyleIfNeed: function() {
 			var props = this.props
-			if (!props.isStatic && props.fixed && this.state.axis === 'y') {
-				var state = this.state
+			var state = this.state
+			if (!props.isStatic && props.fixed && state.direction === 'bottom') {
 				extend(this.scroller.style, {
-					// width: state.scrollWidth + 'px',
 					height: state.scrollHeight + 'px',
 					overflow: 'hidden',
 				})
@@ -364,9 +378,9 @@
 		},
 		clearFixedStyleIfNeed: function() {
 			var props = this.props
-			if (!props.isStatic && props.fixed && this.state.axis === 'y') {
+			var state = this.state
+			if (!props.isStatic && props.fixed && state.direction === 'bottom') {
 				extend(this.scroller.style, {
-					// width: '',
 					height: '',
 					overflow: '',
 				})
@@ -380,8 +394,7 @@
 			return listener.call(this, this.state, event)
 		},
 		handleTouchStart: function(event) {
-			console.log(this.isAnimateToOrigin)
-			if (this.isTouching || this.isAnimateToOrigin) {
+			if (this.isTouching || this.isWaitForBackToOrigin) {
 				return
 			}
 			var coor = getCoor(event)
@@ -405,7 +418,6 @@
 			var moveY = coor.y
 			var offsetX = moveX - startX
 			var offsetY = moveY - startY
-			var type = state.type
 			var axis = state.axis
 			var direction = state.direction
 			var isScrollTopEnd = state.isScrollTopEnd
@@ -419,36 +431,34 @@
 			if (!isScrollLeftEnd && state.isScrollLeftEnd || !isScrollRightEnd && state.isScrollRightEnd) {
 				offsetX = 0
 				startX = moveX
-				direction = type = ''
+				direction = ''
 			}
 
 			// first hit the y axis ending
 			if (!isScrollTopEnd && state.isScrollTopEnd || !isScrollBottomEnd && state.isScrollBottomEnd) {
 				offsetY = 0
 				startY = moveY
-				direction = type = ''
+				direction = ''
 			}
 
+			// only check the axis once time
 			if (!axis) {
 				axis = Math.abs(offsetY) >= Math.abs(offsetX) ? 'y' : 'x'
 			}
 
-			if (!type) {
+			// only check the direction once time
+			if (!direction) {
 				if (axis === 'y') {
 					if (state.isScrollTopEnd && offsetY > 0) {
 						direction = 'top'
-						type = 'onPullDown'
 					} else if (state.isScrollBottomEnd && offsetY < 0) {
 						direction = 'bottom'
-						type = 'onPullUp'
 					}
 				} else if (axis === 'x') {
 					if (state.isScrollLeftEnd && offsetX > 0) {
 						direction = 'left'
-						type = 'onPullRight'
 					} else if (state.isScrollRightEnd && offsetX < 0) {
 						direction = 'right'
-						type = 'onPullLeft'
 					}
 				}
 			}
@@ -468,7 +478,6 @@
 				translateY: translateY,
 				direction: direction,
 				axis: axis,
-				type: type,
 			})
 
 			if (!direction) {
@@ -476,16 +485,18 @@
 			}
 
 			if (!props.drag) {
-				if (axis === 'y' && (props[type] || props[direction])) {
-					translateX = 0
-				} else if (axis === 'x' && (props[type] || props[direction])) {
-					translateY = 0
+				if (props[eventMap[direction]] || props[direction]) {
+					if (axis === 'y') {
+						translateX = 0
+					} else if (axis === 'x') {
+						translateY = 0
+					}
 				} else {
 					return
 				}
 			}
 
-			this.emit(type, event)
+			this.emit(eventMap[direction], event)
 			if (this.isPreventDefault) {
 				this.isPreventDefault = false
 				return
@@ -493,6 +504,7 @@
 
 			event.preventDefault()
 
+			this.isWaitForBackToOrigin = true
 			this.setFixedStyleIfNeed()
 			this.setTranslate({
 				x: translateX,
@@ -504,29 +516,22 @@
 			if (!this.isTouching) {
 				return
 			}
-			var type = this.state.type
-			if (type) {
-				this.isAnimateToOrigin = true
-			}
+			var direction = this.state.direction
 			this.isTouching = false
-			this.emit(type + 'End', event)
+			if (!direction) {
+				return
+			}
+			this.emit(eventMap[direction] + 'End', event)
 			if (this.isPreventDefault) {
 				this.isPreventDefault = false
 				return
 			}
-			if (type) {
-				this.animateToOrigin()
-			}
+			this.animateToOrigin()
 		},
 		handleTransitionEnd: function(event) {
 			this.emit('onTransitionEnd', event)
-			if (this.isAnimateToOrigin) {
-				this.isAnimateToOrigin = false
-				this.emit('onOrigin', event)
-				this.clearFixedStyleIfNeed()
-			}
 		},
 	})
 
-	return VirtualViewport
+	return PullElement
 }));
