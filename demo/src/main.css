@@ -4,30 +4,15 @@
 }
 
 
-/*html {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}*/
-html {
-    /*width: 100%;
-    height: 100%;
-    overflow: hidden;*/
-}
 body {
     background: #eaeaea;
     -webkit-overflow-scrolling: touch;
     overflow-scrolling: touch;
-    /*width: 100%;
-    height: 100%;
-    overflow: hidden;*/
 }
 
 #root {
     position: relative;
     height: 100%;
-    /*margin-top: 70px;*/
-    /*overflow: hidden;*/
     background: #fff;
 }
 
@@ -55,8 +40,28 @@ body {
 }
 
 .item {
-    height: 40px;
+    height: 50px;
     border-top: 1px solid #eaeaea;
+    position: relative;
+    line-height: 50px;
+    overflow: hidden;
+}
+
+.item .close-button {
+    position: absolute;
+    top: 0;
+    right: -500px;
+    width: 500px;
+    height: 100%;
+    background: red;
+    color: #fff;
+    z-index: -1;
+    text-align: left
+}
+
+.item .content {
+    position: relative;
+    z-index: 1;
 }
 
 .pull-up {
@@ -73,10 +78,6 @@ body {
 .wrapper {
     position: relative;
     text-align: center;
-    /*height: 100%;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    overflow-scrolling: touch;*/
 }
 
 .pull_refresh {
