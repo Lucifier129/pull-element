@@ -1,0 +1,14 @@
+#root {
+	width:100%;
+	height:100%;
+}
+
+.icon.icon-red {
+	width: 29px;
+    height: 29px;
+    border-radius: 6px;
+    background-color: red;
+    line-height: 29px;
+    text-align: center;
+    color: #fff;
+}

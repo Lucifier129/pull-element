@@ -1,17 +1,22 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './main.css'
-import PullToRefresh from './pull-to-refresh'
+import Home from './page/Home'
+import PullToRefresh from './page/PullToRefresh'
 
-const rootElem = document.getElementById('root')
 
-const component = {
-    'pull-to-refresh': PullToRefresh,
+
+const components = {
+	'/': Home,
+	'pull-to-refresh': PullToRefresh,
 }
 
 function renderView() {
-    let App = component[location.hash] || component['pull-to-refresh']
-    ReactDOM.render(<App />, rootElem)
+	let Target = components[location.hash.substr(1)] || Home
+    ReactDOM.render(
+    	<Target />,
+    	document.getElementById('root')
+    )
 }
 
-window.addEventListener('hashchange', renderView())
+window.addEventListener('hashchange', renderView)
+renderView()
