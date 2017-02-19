@@ -59,7 +59,7 @@ class SwipeToDeleteItem extends Component {
 			onPullLeftEnd({ translateX }) {
 				if (-translateX >= 109) {
 					this.preventDefault()
-					this.animateTo({x: -109, y: 0 })
+					this.animateTo(-109, 0)
 					component.setState({
 						isShowAction: true
 					})

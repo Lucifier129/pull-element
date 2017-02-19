@@ -72,7 +72,7 @@ class Content extends Component {
 				if (translateY > 45) {
 					this.preventDefault()
 					classList.add('refreshing')
-					this.animateTo({ x: 0, y: 0})
+					this.animateTo(0, 0)
 					await component.refresh()
 					classList.remove('refreshing')
 					this.animateToOrigin()
