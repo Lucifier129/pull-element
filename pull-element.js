@@ -127,6 +127,68 @@
 		return value
 	}
 
+	function setTranslate(elem, position, otherStyle) {
+		if (!elem) {
+			return
+		}
+		var translateStyle = getTranslateStyle(position)
+		var transitionStyle = {
+			transition: '',
+			webkitTransition: '',
+		}
+		extend(elem.style, transitionStyle, translateStyle, otherStyle)
+	}
+
+	function animateTo(elem, position, otherStyle, callback) {
+		if (!elem) {
+			return
+		}
+		if (isFunction(otherStyle)) {
+			callback = otherStyle
+			otherStyle = null
+		}
+		otherStyle = otherStyle || defaultProps
+
+		var finalStyle = extend({
+			webkitTransitionProperty: otherStyle.transitionProperty,
+			webkitTransitionDuration: otherStyle.transitionDuration,
+			webkitTransitionTimingFunction: otherStyle.transitionTimingFunction,
+		}, getTranslateStyle(position), otherStyle)
+
+		var addTransitionEndListener = function(resolve) {
+			var isCalled = false
+			var handleTransitionEnd = function() {
+				if (isCalled) {
+					return
+				}
+				isCalled = true
+				callback && callback()
+				resolve && resolve()
+				removeEvent(elem, 'transitionend', handleTransitionEnd)
+				removeEvent(elem, 'webkitTransitionEnd', handleTransitionEnd)
+			}
+			addEvent(elem, 'transitionend', handleTransitionEnd)
+			addEvent(elem, 'webkitTransitionEnd', handleTransitionEnd)
+			extend(elem.style, finalStyle)
+			
+			// in some browser, transitionend dose'nt work as expected
+			var transitionDuration = Number(finalStyle.transitionDuration.replace(/[^.\d]+/g, ''))
+
+			// transform 1s to 1000ms
+			if (/[\d\.]+s$/.test(finalStyle.transitionDuration)) {
+				transitionDuration = transitionDuration * 1000
+			}
+
+			setTimeout(handleTransitionEnd, transitionDuration)
+		}
+
+		if (isSupportPromise) {
+			return new Promise(addTransitionEndListener)
+		}
+
+		addTransitionEndListener()
+	}
+
 	var staticScrollStatus = {
 		isScrollTopEnd: true,
 		isScrollLeftEnd: true,
@@ -196,6 +258,7 @@
 		this.isTouching = false
 		this.isPreventDefault = false
 		this.isWaitForBackToOrigin = false
+		this.isDestroy = false
 		this.preventDefault = this.preventDefault.bind(this)
 		this.handleTouchStart = this.handleTouchStart.bind(this)
 		this.handleTouchMove = this.handleTouchMove.bind(this)
@@ -222,6 +285,7 @@
 			this.target = null
 			this.scroller = null
 			this.trigger = null
+			this.isDestroy = true
 		},
 		getDamping: function() {
 			var defaultDamping = defaultProps.damping
@@ -246,62 +310,16 @@
 			return damping
 		},
 		setTranslate: function(position, otherStyle) {
-			if (!this.target) {
-				return
-			}
-			var translateStyle = getTranslateStyle(position)
-			var transitionStyle = {
-				transition: '',
-				webkitTransition: '',
-			}
-			extend(this.target.style, transitionStyle, translateStyle, otherStyle)
+			setTranslate(this.target, position, otherStyle)
 		},
 		animateTo: function(position, otherStyle, callback) {
-			if (!this.target) {
-				return
-			}
-			if (isFunction(otherStyle)) {
-				callback = otherStyle
-				otherStyle = null
-			}
-			var target = this.target
 			var props = this.props
-			var translateStyle = getTranslateStyle(position)
 			var transitionStyle = {
 				transitionProperty: props.transitionProperty,
 				transitionDuration: props.transitionDuration,
 				transitionTimingFunction: props.transitionTimingFunction,
-				webkitTransitionProperty: props.transitionProperty,
-				webkitTransitionDuration: props.transitionDuration,
-				webkitTransitionTimingFunction: props.transitionTimingFunction,
 			}
-			var addTransitionEndListener = function(resolve) {
-				var isCalled = false
-				var handleTransitionEnd = function() {
-					if (isCalled) {
-						return
-					}
-					isCalled = true
-					callback && callback()
-					resolve && resolve()
-					removeEvent(target, 'transitionend', handleTransitionEnd)
-					removeEvent(target, 'webkitTransitionEnd',handleTransitionEnd)
-				}
-				addEvent(target, 'transitionend', handleTransitionEnd)
-				addEvent(target, 'webkitTransitionEnd',handleTransitionEnd)
-				extend(target.style, transitionStyle, translateStyle, otherStyle)
-				// in some browser, transitionend dose'nt work as expected
-				var transitionDuration = Number(props.transitionDuration.replace(/[^.\d]+/g, ''))
-				// transform 1s to 1000ms
-				if (/[\d\.]+s$/.test(props.transitionDuration)) {
-					transitionDuration = transitionDuration * 1000
-				}
-				setTimeout(handleTransitionEnd, transitionDuration)
-			}
-			if (isSupportPromise) {
-				return new Promise(addTransitionEndListener)
-			}
-			addTransitionEndListener()
+			return animateTo(this.target, position, extend(transitionStyle, otherStyle), callback)
 		},
 		animateToOrigin: function(otherStyle, callback) {
 			if (!this.target) {
@@ -313,10 +331,10 @@
 			}
 			var context = this
 			var finalCallback = function(event) {
-				context.clearFixedStyleIfNeed()
+				!context.isDestroy && context.clearFixedStyleIfNeed()
 				context.isWaitForBackToOrigin = false
 				callback && callback(event)
-				context.emit('onOrigin', event)		
+				!context.isDestroy && context.emit('onOrigin', event)		
 			}
 			return this.animateTo({ x: 0, y: 0 }, otherStyle, finalCallback)
 		},
@@ -546,6 +564,11 @@
 			this.animateToOrigin()
 		},
 	})
+
+	PullElement.setTranslate = setTranslate
+	PullElement.animateTo = animateTo
+	PullElement.getScrollInfo = getScrollInfo
+	PullElement.getGlobalScrllInfo = getGlobalScrllInfo
 
 	return PullElement
 }));

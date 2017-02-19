@@ -17,6 +17,7 @@ export default function Menu({ hash }) {
 	                    <div className="list-block">
 	                    	<ul>
 	                    		<ListItem href="#pull-to-refresh" text="Pull To Refresh" iconText="P" />
+	                    		<ListItem href="#swipe-to-delete" text="Swipe To Delete" iconText="S" />
 	                    	</ul>
 	                    </div>
 	                </div>
