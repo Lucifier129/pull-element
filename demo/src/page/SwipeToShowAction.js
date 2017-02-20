@@ -26,7 +26,7 @@ export default function Root() {
 						                    <div className="item-media">
 						                    	<i className="icon icon-red">S</i>
 						                    </div>
-						                    <div className="item-inner">
+						                    <div className="item-inner" style={{ minHeight: 50 }}>
 						                        <div className="item-title">I can't swipe to show action</div>
 						                    </div>
 						                </div>
@@ -99,7 +99,7 @@ class SwipeToShowAction extends Component {
 	                    <div className="item-media">
 	                    	<i className="icon icon-red">S</i>
 	                    </div>
-	                    <div className="item-inner">
+	                    <div className="item-inner" style={{ minHeight: 50 }}>
 	                        <div className="item-title">{text}</div>
 	                    </div>
 	                </div>
@@ -107,7 +107,7 @@ class SwipeToShowAction extends Component {
 	                	<a
 	                		href="javascript:;"
 	                		className="swipeout-delete"
-	                		onTouchStart={this.handleAction}
+	                		onClick={this.handleAction}
 	                	>
 	                		Delete
 	                	</a>
@@ -168,13 +168,13 @@ class SwipeToShowTowActions extends Component {
 				<div ref="container">
 				    <div className="item-content swipeout-content">
 				        <div className="item-media"><i className="icon icon-red">S</i></div>
-				        <div className="item-inner">
+				        <div className="item-inner" style={{ minHeight: 50 }}>
 				            <div className="item-title">{text}</div>
 				        </div>
 				    </div>
 				    <div className="swipeout-actions-right">
-				    	<a href="javascript:;" className="demo-actions" onTouchStart={this.handleAction}>More</a>
-				    	<a href="javascript:;" className="swipeout-delete" onTouchStart={this.handleAction}>Delete</a>
+				    	<a href="javascript:;" className="demo-actions" onClick={this.handleAction}>More</a>
+				    	<a href="javascript:;" className="swipeout-delete" onClick={this.handleAction}>Delete</a>
 				    </div>
 				</div>
 			</li>
@@ -231,7 +231,7 @@ class SwipeToShowActionOnRight extends Component {
 			    <div ref="container">
 			        <div className="item-content swipeout-content">
 			            <div className="item-media"><i className="icon icon-red">S</i></div>
-			            <div className="item-inner">
+			            <div className="item-inner" style={{ minHeight: 50 }}>
 			                <div className="item-title">{text}</div>
 			            </div>
 			        </div>
@@ -239,14 +239,14 @@ class SwipeToShowActionOnRight extends Component {
 			        	<a
 			        		href="javascript:;"
 			        		className="bg-blue demo-forward"
-			        		onTouchStart={this.handleAction}
+			        		onClick={this.handleAction}
 			        	>
 			        		Reply
 			        	</a>
 			        	<a
 			        		href="javascript:;"
 			        		className="bg-green demo-reply"
-			        		onTouchStart={this.handleAction}
+			        		onClick={this.handleAction}
 			        	>
 			        		Forward
 			        	</a>
@@ -313,7 +313,7 @@ class SwipeToShowActionOnBothSide extends Component {
 			    <div ref="container">
 			        <div className="swipeout-content">
 			            <a href="javascript:;" className="item-link item-content">
-			                <div className="item-inner">
+			                <div className="item-inner" style={{ minHeight: 50 }}>
 			                    <div className="item-title-row">
 			                        <div className="item-title">Facebook</div>
 			                        <div className="item-after">17:14</div>
@@ -324,21 +324,21 @@ class SwipeToShowActionOnBothSide extends Component {
 			            </a>
 			        </div>
 			        <div className="swipeout-actions-left">
-			            <a href="javascript:;" className="bg-green swipeout-overswipe demo-reply" onTouchStart={this.handleAction}>
+			            <a href="javascript:;" className="bg-green swipeout-overswipe demo-reply" onClick={this.handleAction}>
 				    		Reply
 				    	</a>
-			            <a href="javascript:;" className="demo-forward bg-blue" onTouchStart={this.handleAction}>
+			            <a href="javascript:;" className="demo-forward bg-blue" onClick={this.handleAction}>
 				    		Forward
 				    	</a>
 			        </div>
 			        <div className="swipeout-actions-right">
-			            <a href="javascript:;" className="demo-actions" onTouchStart={this.handleAction}>
+			            <a href="javascript:;" className="demo-actions" onClick={this.handleAction}>
 				    		More
 				    	</a>
-			            <a href="javascript:;" className="demo-mark bg-orange" onTouchStart={this.handleAction}>
+			            <a href="javascript:;" className="demo-mark bg-orange" onClick={this.handleAction}>
 				    		Mark
 				    	</a>
-			            <a href="javascript:;" className="swipeout-delete swipeout-overswipe" onTouchStart={this.handleAction}>
+			            <a href="javascript:;" className="swipeout-delete swipeout-overswipe" onClick={this.handleAction}>
 				    		Delete
 				    	</a>
 			        </div>
