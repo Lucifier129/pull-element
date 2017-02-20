@@ -392,7 +392,7 @@
 			}
 
 			if (!props.drag) {
-				if (!props[eventMap[direction]] && !props[eventMap[direction + 'End']] && !props[direction]) {
+				if (!props[eventMap[direction]] && !props[eventMap[direction] + 'End'] && !props[direction]) {
 					return
 				}
 				if (axis === 'y') {

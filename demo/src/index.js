@@ -2,14 +2,14 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import Home from './page/Home'
 import PullToRefresh from './page/PullToRefresh'
-import SwipeToDelete from './page/SwipeToDelete'
+import SwipeToShowAction from './page/SwipeToShowAction'
 
 
 
 const components = {
 	'/': Home,
 	'pull-to-refresh': PullToRefresh,
-	'swipe-to-delete': SwipeToDelete,
+	'swipe-to-show-action': SwipeToShowAction,
 }
 
 function renderView() {
