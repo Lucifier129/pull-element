@@ -55,6 +55,7 @@ class SwipeToDeleteItem extends Component {
 		this.pullElement = new PullElement({
 			target: container,
 			isStatic: true,
+			wait: false,
 			onPullLeft() {},
 			onPullLeftEnd({ translateX }) {
 				if (-translateX >= 109) {
@@ -100,37 +101,13 @@ class SwipeToDeleteItem extends Component {
 	                        <div className="item-title">{text}</div>
 	                    </div>
 	                </div>
-	                <OuterClickWrapper onOuterClick={this.handleGoBack}>
-		                <div className="swipeout-actions-right">
-		                	<a href="javascript:;" className="swipeout-delete" onClick={this.handleAction}>
-		                		Back
-		                	</a>
-		                </div>
-	                </OuterClickWrapper>
+	                <div className="swipeout-actions-right">
+	                	<a href="javascript:;" className="swipeout-delete" onClick={this.handleAction}>
+	                		Back
+	                	</a>
+	                </div>
 	             </div>
             </li>
 		)
-	}
-}
-
-class OuterClickWrapper extends Component {
-	componentDidMount() {
-		this.node = findDOMNode(this)
-		document.addEventListener('click', this.handleOuterClick)
-	}
-	componentWillUnmount() {
-		this.node = null
-		document.removeEventListener('click', this.handleOuterClick)
-	}
-	handleOuterClick = ({ target }) => {
-		let node = this.node
-		if (target !== node && !node.contains(target)) {
-			if (this.props.onOuterClick) {
-				this.props.onOuterClick()
-			}
-		}
-	}
-	render() {
-		return React.Children.only(this.props.children)
 	}
 }

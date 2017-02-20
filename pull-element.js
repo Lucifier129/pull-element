@@ -151,12 +151,8 @@
 		isScrollLeftEnd: false,
 		isScrollBottomEnd: false,
 		isScrollRightEnd: false,
-		startX: 0,
-		startY: 0,
-		moveX: 0,
-		moveY: 0,
-		offsetX: 0,
-		offsetY: 0,
+		clientX: 0,
+		clientY: 0,
 		translateX: 0,
 		translateY: 0,
 		direction: '',
@@ -223,6 +219,7 @@
 			extend(this.target.style, transitionStyle, translateStyle)
 		},
 		animateTo: function(translateX, translateY, callback) {
+			var state = this.state
 			var props = this.props
 			var target = this.target
 			var translateStyle = getTranslateStyle(translateX, translateY)
@@ -257,6 +254,9 @@
 				extend(target.style, transitionStyle, translateStyle)
 				setTimeout(handleTransitionEnd, transitionDuration)
 			}
+
+			state.translateX = translateX
+			state.translateY = translateY
 			
 			if (isSupportPromise) {
 				return new Promise(createTransitionEndHandler)
@@ -268,6 +268,12 @@
 			var finalCallback = function() {
 				context.isWaiting = false
 				extend(context.target.style, emptyStyle)
+				extend(context.state, {
+					direction: '',
+					axis: '',
+					translateX: 0,
+					translateY: 0,
+				})
 				callback && callback()
 			}
 			return this.animateTo(0, 0, finalCallback)
@@ -320,9 +326,9 @@
 				return
 			}
 			var coor = getCoor(event)
-			this.state = extend({}, defaultState, this.getScrollInfo(), {
-				startX: coor.x,
-				startY: coor.y,
+			extend(this.state, this.getScrollInfo(), {
+				clientX: coor.x,
+				clientY: coor.y,
 			})
 			this.stopPropagationIfNeed(event)
 			this.isTouching = true
@@ -334,65 +340,47 @@
 			var coor = getCoor(event)
 			var props = this.props
 			var state = this.state
-			var startX = state.startX
-			var startY = state.startY
-			var moveX = coor.x
-			var moveY = coor.y
-			var offsetX = moveX - startX
-			var offsetY = moveY - startY
+			var clientX = coor.x
+			var clientY = coor.y
+			var deltaX = clientX - state.clientX
+			var deltaY = clientY - state.clientY
+			var translateX = state.translateX
+			var translateY = state.translateY
 			var axis = state.axis
 			var direction = state.direction
-			var isScrollTopEnd = state.isScrollTopEnd
-			var isScrollBottomEnd = state.isScrollBottomEnd
-			var isScrollLeftEnd = state.isScrollLeftEnd
-			var isScrollRightEnd = state.isScrollRightEnd
 
 			this.detectScrollIfNeed()
 
 			// only check the axis once time
 			if (!axis) {
-				axis = Math.abs(offsetY) >= Math.abs(offsetX) ? 'y' : 'x'
+				axis = Math.abs(deltaY) >= Math.abs(deltaX) ? 'y' : 'x'
 			}
 
 			// only check the direction once time
 			if (!direction) {
 				if (axis === 'y') {
-					if (state.isScrollTopEnd && offsetY > 0) {
+					if (state.isScrollTopEnd && deltaY > 0) {
 						direction = 'top'
-					} else if (state.isScrollBottomEnd && offsetY < 0) {
+					} else if (state.isScrollBottomEnd && deltaY < 0) {
 						direction = 'bottom'
 					}
 				} else if (axis === 'x') {
-					if (state.isScrollLeftEnd && offsetX > 0) {
+					if (state.isScrollLeftEnd && deltaX > 0) {
 						direction = 'left'
-					} else if (state.isScrollRightEnd && offsetX < 0) {
+					} else if (state.isScrollRightEnd && deltaX < 0) {
 						direction = 'right'
 					}
 				}
 			}
 
-			// first hit the x axis ending
-			if (!isScrollLeftEnd && state.isScrollLeftEnd || !isScrollRightEnd && state.isScrollRightEnd) {
-				offsetX = 0
-				startX = moveX
+			if (direction) {
+				translateX += transformValueByDamping(deltaX, props.damping)
+				translateY += transformValueByDamping(deltaY, props.damping)
 			}
-
-			// first hit the y axis ending
-			if (!isScrollTopEnd && state.isScrollTopEnd || !isScrollBottomEnd && state.isScrollBottomEnd) {
-				offsetY = 0
-				startY = moveY
-			}
-
-			var translateX = transformValueByDamping(offsetX, props.damping)
-			var translateY = transformValueByDamping(offsetY, props.damping)
-
+			
 			extend(this.state, {
-				startX: startX,
-				startY: startY,
-				moveX: moveX,
-				moveY: moveY,
-				offsetX: offsetX,
-				offsetY: offsetY,
+				clientX: clientX,
+				clientY: clientY,
 				translateX: translateX,
 				translateY: translateY,
 				direction: direction,
@@ -404,14 +392,13 @@
 			}
 
 			if (!props.drag) {
-				if (props[eventMap[direction]] || props[eventMap[direction + 'End']] || props[direction]) {
-					if (axis === 'y') {
-						translateX = 0
-					} else if (axis === 'x') {
-						translateY = 0
-					}
-				} else {
+				if (!props[eventMap[direction]] && !props[eventMap[direction + 'End']] && !props[direction]) {
 					return
+				}
+				if (axis === 'y') {
+					translateX = 0
+				} else if (axis === 'x') {
+					translateY = 0
 				}
 			}
 
@@ -421,8 +408,9 @@
 				return
 			}
 
-			this.isWaiting = true
-
+			if (props.wait) {
+				this.isWaiting = true
+			}
 			event.preventDefault()
 			this.setTranslate(translateX, translateY)
 		},
