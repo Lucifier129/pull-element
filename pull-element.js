@@ -274,8 +274,10 @@
 					translateX: 0,
 					translateY: 0,
 				})
+				context.isWaiting = false
 				callback && callback()
 			}
+			this.isWaiting = true
 			return this.animateTo(0, 0, finalCallback)
 		},
 		enable: function() {
@@ -314,6 +316,10 @@
 				extend(this.state, this.getScrollInfo())
 			}
 		},
+		isActiveDirection: function(direction) {
+			var props = this.props
+			return props[eventMap[direction]] || props[eventMap[direction] + 'End'] || props[direction]
+		},
 		emit: function(type, event) {
 			var listener = this.props[type]
 			if (!isFunction(listener)) {
@@ -329,6 +335,8 @@
 			extend(this.state, this.getScrollInfo(), {
 				clientX: coor.x,
 				clientY: coor.y,
+				axis: '',
+				direction: '',
 			})
 			this.stopPropagationIfNeed(event)
 			this.isTouching = true
@@ -373,7 +381,9 @@
 				}
 			}
 
-			if (direction) {
+			var isActiveDirection = this.isActiveDirection(direction)
+
+			if (isActiveDirection) {
 				translateX += transformValueByDamping(deltaX, props.damping)
 				translateY += transformValueByDamping(deltaY, props.damping)
 			}
@@ -387,14 +397,11 @@
 				axis: axis,
 			})
 
-			if (!direction) {
+			if (!isActiveDirection) {
 				return
 			}
 
 			if (!props.drag) {
-				if (!props[eventMap[direction]] && !props[eventMap[direction] + 'End'] && !props[direction]) {
-					return
-				}
 				if (axis === 'y') {
 					translateX = 0
 				} else if (axis === 'x') {
@@ -421,7 +428,7 @@
 			this.isTouching = false
 
 			var direction = this.state.direction
-			if (!direction) {
+			if (!direction || !this.isActiveDirection(direction)) {
 				return
 			}
 

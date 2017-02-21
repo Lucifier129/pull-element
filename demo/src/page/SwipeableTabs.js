@@ -2,16 +2,27 @@ import React, { Component } from 'react'
 import PullElement from '../../../'
 
 export default class SwipeableTabs extends Component {
+	activeIndex = 0
 	componentDidMount() {
 		let component = this
 		let { target, tabs } = this.refs
 		let clientWidth = target.clientWidth
 		let handlePullEnd = function({ translateX }) {
 			this.preventDefault()
-			let ratio = Math.round(translateX / clientWidth)
-			ratio = Math.min(0, ratio)
-			ratio = Math.max(-2, ratio)
-			component.switchTab(-ratio)
+			let activeIndex = component.activeIndex
+			let diff = activeIndex + translateX / clientWidth
+			if (diff > 0.2) {
+				activeIndex -= 1
+			} else if (diff < -0.2) {
+				activeIndex += 1
+			}
+			if (activeIndex < 0){
+				activeIndex = 0
+			} else if (activeIndex > 2) {
+				activeIndex = 2
+			}
+			component.activeIndex = activeIndex
+			component.switchTab(activeIndex)
 		}
 		this.pullElement = new PullElement({
 			target: target,
@@ -46,6 +57,7 @@ export default class SwipeableTabs extends Component {
 	}
 	handleSwitchTab = ({currentTarget}) => {
 		let index = Number(currentTarget.getAttribute('data-index'))
+		this.activeIndex = index
 		this.switchTab(index)
 	}
 	render() {

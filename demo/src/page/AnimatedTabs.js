@@ -46,6 +46,12 @@ export default class AnimatedTabs extends Component {
 				<div className="pages navbar-through">
 				    <div data-page="tabs-animated" className="page with-subnavbar">
 				        <div className="tabs-animated-wrap">
+				        		<style type="text/css" dangerouslySetInnerHTML={{__html:`
+				        			.tabs-animated-wrap>.tabs {
+				        				 -webkit-transition-duration: 0ms;
+    									 transition-duration: 0ms;
+				        			}
+				        		`}} />
 				            	<div className="tabs" ref="target">
 					                <div id="tab1" className="page-content tab">
 					                    <div className="content-block">

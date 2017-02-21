@@ -54,6 +54,12 @@ class SwipeToShowAction extends Component {
 			target: this.refs.container,
 			isStatic: true,
 			wait: false,
+			// left: true,
+			onPullRight({ translateX }) {
+				if (translateX >= 0) {
+					this.preventDefault()
+				}
+			},
 			onPullLeftEnd({ translateX }) {
 				if (-translateX >= 109 / 2) {
 					this.preventDefault()
@@ -125,6 +131,7 @@ class SwipeToShowTowActions extends Component {
 			target: this.refs.container,
 			isStatic: true,
 			wait: false,
+			left: true,
 			onPullLeftEnd({ translateX }) {
 				if (-translateX >= 207 / 2) {
 					this.preventDefault()
@@ -188,6 +195,7 @@ class SwipeToShowActionOnRight extends Component {
 			target: this.refs.container,
 			isStatic: true,
 			wait: false,
+			right: true,
 			onPullRightEnd({ translateX }) {
 				if (translateX >= 225 / 2) {
 					this.preventDefault()
