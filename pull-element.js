@@ -351,12 +351,12 @@
 
 			this.detectScrollIfNeed()
 
-			// only check the axis once time
+			// only check the axis once
 			if (!axis) {
 				axis = Math.abs(deltaY) >= Math.abs(deltaX) ? 'y' : 'x'
 			}
 
-			// only check the direction once time
+			// only check the direction once
 			if (!direction) {
 				if (axis === 'y') {
 					if (state.isScrollTopEnd && deltaY > 0) {
