@@ -6,7 +6,7 @@ import delay from '../util/delay'
 export default function PullToRefresh({ hash }) {
 	return (
 	<div className="views">
-	    <div className="view view-main" data-page="index">
+	    <div className="view view-main">
 	        <Header />
 	        <div className="pages navbar-through toolbar-through">
 	        	<div className="page page-on-center">
