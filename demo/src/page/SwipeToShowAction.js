@@ -52,16 +52,14 @@ class SwipeToShowAction extends Component {
 	addPullElement() {
 		this.pullElement = new PullElement({
 			target: this.refs.container,
-			isStatic: true,
 			wait: false,
-			// left: true,
 			onPullRight({ translateX }) {
 				if (translateX >= 0) {
 					this.preventDefault()
 				}
 			},
 			onPullLeftEnd({ translateX }) {
-				if (-translateX >= 109 / 2) {
+				if (-translateX >= 30) {
 					this.preventDefault()
 					this.animateTo(-109, 0)
 				} 
@@ -129,11 +127,10 @@ class SwipeToShowTowActions extends Component {
 	addPullElement() {
 		this.pullElement = new PullElement({
 			target: this.refs.container,
-			isStatic: true,
 			wait: false,
-			left: true,
+			pullRight: true,
 			onPullLeftEnd({ translateX }) {
-				if (-translateX >= 207 / 2) {
+				if (-translateX >= 50) {
 					this.preventDefault()
 					this.animateTo(-207, 0)
 				} 
@@ -193,11 +190,10 @@ class SwipeToShowActionOnRight extends Component {
 	addPullElement() {
 		this.pullElement = new PullElement({
 			target: this.refs.container,
-			isStatic: true,
 			wait: false,
-			right: true,
+			pullLeft: true,
 			onPullRightEnd({ translateX }) {
-				if (translateX >= 225 / 2) {
+				if (translateX >= 50) {
 					this.preventDefault()
 					this.animateTo(225, 0)
 				}
@@ -271,16 +267,15 @@ class SwipeToShowActionOnBothSide extends Component {
 	addPullElement() {
 		this.pullElement = new PullElement({
 			target: this.refs.container,
-			isStatic: true,
 			wait: false,
 			onPullLeftEnd({ translateX }) {
-				if (-translateX >= 305 / 2) {
+				if (-translateX >= 50) {
 					this.preventDefault()
 					this.animateTo(-305, 0)
 				}
 			},
 			onPullRightEnd({ translateX }) {
-				if (translateX >= 225 / 2) {
+				if (translateX >= 50) {
 					this.preventDefault()
 					this.animateTo(225, 0)
 				}

@@ -9,10 +9,11 @@ export default class SpaceBetweenSlides extends Component {
 		let activeIndex = 0
 		let handlePullEnd = function({ translateX }) {
 			this.preventDefault()
-			let diff = activeIndex + translateX / (clientWidth + 50)
-			if (diff > 0.2) {
+			let prevTranslateX = -activeIndex * (clientWidth + 50)
+			let diff = translateX - prevTranslateX
+			if (diff > 50) {
 				activeIndex -= 1
-			} else if (diff < -0.2) {
+			} else if (diff < -50) {
 				activeIndex += 1
 			}
 			if (activeIndex < 0){

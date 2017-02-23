@@ -9,10 +9,11 @@ export default class VerticalSwiper extends Component {
 		let activeIndex = 0
 		let handlePullEnd = function({ translateY }) {
 			this.preventDefault()
-			let diff = activeIndex + translateY / clientHeight
-			if (diff > 0.15) {
+			let prevTranslateY = -activeIndex * clientHeight
+			let diff = translateY - prevTranslateY
+			if (diff > 50) {
 				activeIndex -= 1
-			} else if (diff < -0.15) {
+			} else if (diff < -50) {
 				activeIndex += 1
 			}
 			if (activeIndex < 0){

@@ -32,52 +32,30 @@
 		return typeof obj === 'function'
 	}
 
-	function getScrollInfo(scroller) {
-		var scrollTop = scroller.scrollTop
-		var scrollLeft = scroller.scrollLeft
-		var offsetWidth = scroller.offsetWidth
-		var offsetHeight = scroller.offsetHeight
+	function getScrollEndingInfo(scroller, isGlobalScroller) {
+		var scrollTop, scrollLeft, offsetWidth, offsetHeight
 		var scrollWidth = scroller.scrollWidth
 		var scrollHeight = scroller.scrollHeight
 
-		var scrollBaseInfo = {
-			scrollTop: scrollTop,
-			scrollLeft: scrollLeft,
-			offsetWidth: offsetWidth,
-			offsetHeight: offsetHeight,
-			scrollWidth: scrollWidth,
-			scrollHeight: scrollHeight,
+		if (isGlobalScroller) {
+			var documentElement = document.documentElement
+			var documentBody = document.body
+			offsetWidth = documentElement.clientWidth
+			offsetHeight = documentElement.clientHeight
+			scrollTop = documentBody.scrollTop || documentElement.scrollTop
+			scrollLeft = documentBody.scrollLeft || documentElement.scrollLeft
+		} else {
+			scrollTop = scroller.scrollTop
+			scrollLeft = scroller.scrollLeft
+			offsetWidth = scroller.offsetWidth
+			offsetHeight = scroller.offsetHeight
 		}
-		return extend(scrollBaseInfo, getScrollEndingInfo(scrollBaseInfo))
-	}
 
-	function getGlobalScrllInfo(document) {
-		var documentElement = document.documentElement
-		var clientWidth = documentElement.clientWidth
-		var clientHeight = documentElement.clientHeight
-		var scrollWidth = documentElement.scrollWidth
-		var scrollHeight = documentElement.scrollHeight
-		var scrollTop = document.body.scrollTop || documentElement.scrollTop
-		var scrollLeft = document.body.scrollLeft || documentElement.scrollLeft
-
-		var scrollBaseInfo = {
-			scrollTop: scrollTop,
-			scrollLeft: scrollLeft,
-			scrollWidth: scrollWidth,
-			scrollHeight: scrollHeight,
-			// alias clientWidth to offsetWidth, the same as clientHeight
-			offsetWidth: clientWidth,
-			offsetHeight: clientHeight,
-		}
-		return extend(scrollBaseInfo, getScrollEndingInfo(scrollBaseInfo))
-	}
-
-	function getScrollEndingInfo(scrollInfo) {
 		return {
-			isScrollTopEnd: scrollInfo.scrollTop <= 0,
-			isScrollBottomEnd: scrollInfo.offsetHeight + scrollInfo.scrollTop >= scrollInfo.scrollHeight,
-			isScrollLeftEnd: scrollInfo.scrollLeft <= 0,
-			isScrollRightEnd: scrollInfo.offsetWidth + scrollInfo.scrollLeft >= scrollInfo.scrollWidth,
+			isScrollTopEnd: scrollTop <= 0,
+			isScrollBottomEnd: offsetHeight + scrollTop >= scrollHeight,
+			isScrollLeftEnd: scrollLeft <= 0,
+			isScrollRightEnd: offsetWidth + scrollLeft >= scrollWidth,
 		}
 	}
 
@@ -119,13 +97,6 @@
 		}
 	}
 
-	var staticScrollStatus = {
-		isScrollTopEnd: true,
-		isScrollLeftEnd: true,
-		isScrollBottomEnd: true,
-		isScrollRightEnd: true,
-	}
-
 	var emptyStyle = {
 		transition: '',
 		transform: '',
@@ -133,46 +104,56 @@
 		webkitTransition: '',
 	}
 
-	var eventMap = {
-		top: 'onPullDown',
-		bottom: 'onPullUp',
-		left: 'onPullRight',
-		right: 'onPullLeft',
+	var emptyTransitionStyle = {
+		transition: '',
+		webkitTransition: '',
 	}
 
-	var defaultState = {
-		scrollTop: 0,
-		scrollLeft: 0,
-		scrollWidth: 0,
-		scrollHeight: 0,
-		offsetWidth: 0,
-		offsetHeight: 0,
-		isScrollTopEnd: false,
-		isScrollLeftEnd: false,
-		isScrollBottomEnd: false,
-		isScrollRightEnd: false,
-		clientX: 0,
-		clientY: 0,
+	var eventMap = {
+		pullDown: 'onPullDown',
+		pullUp: 'onPullUp',
+		pullRight: 'onPullRight',
+		pullLeft: 'onPullLeft',
+	}
+
+	var propMap = {
+		pullDown: 'isScrollTopEnd',
+		pullUp: 'isScrollBottomEnd',
+		pullRight: 'isScrollLeftEnd',
+		pullLeft: 'isScrollRightEnd',
+	}
+
+	var defaultOffsetState = {
+		action: '',
+		axis: '',
 		translateX: 0,
 		translateY: 0,
-		direction: '',
-		axis: '',
 	}
 
-	var defaultProps = {
+	var defaultState = extend({
+		isScrollTopEnd: true,
+		isScrollLeftEnd: true,
+		isScrollBottomEnd: true,
+		isScrollRightEnd: true,
+		clientX: 0,
+		clientY: 0,
+	}, defaultOffsetState)
+
+	var defaultOptions = {
 		target: 'body',
 		scroller: '',
 		trigger: '',
 		damping: 1.6,
 		wait: true,
-		top: false,
-		bottom: false,
-		left: false,
-		right: false,
-		isStatic: false,
-		drag: false,
+		pullUp: false,
+		pullDown: false,
+		pullLeft: false,
+		pullRight: false,
 		detectScroll: false,
+		detectScrollOnStart: false,
+		detectScrollOnMove: false,
 		stopPropagation: false,
+		drag: false,
 		transitionProperty: 'transform',
 		transitionDuration: '0.3s',
 		transitionTimingFunction: 'ease-out',
@@ -181,16 +162,17 @@
 	var isSupportPromise = typeof Promise === 'function'
 
 	function PullElement(options) {
-		this.options = options
+		this.options = extend({}, defaultOptions, options)
 		this.state = extend({}, defaultState)
-		this.props = null
-		this.document = null
 		this.target = null
 		this.scroller = null
 		this.trigger = null
+		this.transitionStyle = null
 		this.isTouching = false
 		this.isPreventDefault = false
 		this.isWaiting = false
+		this.isGlobalScroller = false
+		this.transitionDuration = 0
 		this.handleTouchStart = this.handleTouchStart.bind(this)
 		this.handleTouchMove = this.handleTouchMove.bind(this)
 		this.handleTouchEnd = this.handleTouchEnd.bind(this)
@@ -199,49 +181,59 @@
 	extend(PullElement.prototype, {
 		init: function() {
 			var options = this.options
-			var doc = this.document = window.document
-			var target = this.target = getElem(options.target)
-			var scroller = this.scroller = options.scroller ? getElem(options.scroller) : target
-			this.trigger = options.trigger ? getElem(options.trigger) : target
-			this.isGlobalScroller = scroller === doc.body || scroller === window || scroller === doc
-			this.props = extend({}, defaultProps, this.options)
+			var target = getElem(options.target)
+			var scroller = options.scroller
+				? getElem(options.scroller)
+				: target
+			var trigger = options.trigger
+				? getElem(options.trigger)
+				: target
+
+			this.target = target
+			this.scroller = scroller
+			this.trigger = trigger
+			this.isGlobalScroller = (
+				scroller === document.body ||
+				scroller === window ||
+				scroller === document.documentElement
+			)
+			this.transitionStyle = {
+				transitionProperty: options.transitionProperty,
+				transitionDuration: options.transitionDuration,
+				transitionTimingFunction: options.transitionTimingFunction,
+				webkitTransitionProperty: options.transitionProperty,
+				webkitTransitionDuration: options.transitionDuration,
+				webkitTransitionTimingFunction: options.transitionTimingFunction,
+			}
+			/**
+			* in some browser, transitionend dose'nt work as expected
+			* use setTimeout instead
+			*/
+			var transitionDuration = Number(options.transitionDuration.replace(/[^.\d]+/g, ''))
+
+			// transform 1s to 1000ms
+			if (/[\d\.]+s$/.test(options.transitionDuration)) {
+				transitionDuration = transitionDuration * 1000
+			}
+			this.transitionDuration = transitionDuration
 			this.enable()
 		},
 		destroy: function() {
 			this.disable()
 		},
 		setTranslate: function(translateX, translateY) {
-			var translateStyle = getTranslateStyle(translateX, translateY)
-			var transitionStyle = {
-				transition: '',
-				webkitTransition: '',
-			}
-			extend(this.target.style, transitionStyle, translateStyle)
+			extend(
+				this.target.style,
+				emptyTransitionStyle,
+				getTranslateStyle(translateX, translateY)
+			)
 		},
 		animateTo: function(translateX, translateY, callback) {
 			var state = this.state
-			var props = this.props
 			var target = this.target
+			var transitionDuration = this.transitionDuration
+			var transitionStyle = this.transitionStyle
 			var translateStyle = getTranslateStyle(translateX, translateY)
-			var transitionStyle = {
-				transitionProperty: props.transitionProperty,
-				transitionDuration: props.transitionDuration,
-				transitionTimingFunction: props.transitionTimingFunction,
-				webkitTransitionProperty: props.transitionProperty,
-				webkitTransitionDuration: props.transitionDuration,
-				webkitTransitionTimingFunction: props.transitionTimingFunction,
-			}
-			/**
-			* in some browser, transitionend dose'nt work as expected
-			* use setTimeout instead
-			*/
-			var transitionDuration = Number(props.transitionDuration.replace(/[^.\d]+/g, ''))
-
-			// transform 1s to 1000ms
-			if (/[\d\.]+s$/.test(props.transitionDuration)) {
-				transitionDuration = transitionDuration * 1000
-			}
-
 			var createTransitionEndHandler = function(resolve) {
 				var isCalled = false
 				var handleTransitionEnd = function() {
@@ -257,88 +249,78 @@
 
 			state.translateX = translateX
 			state.translateY = translateY
-			
+
 			if (isSupportPromise) {
 				return new Promise(createTransitionEndHandler)
 			}
 			createTransitionEndHandler()
 		},
 		animateToOrigin: function(callback) {
+			this.isWaiting = true
 			var context = this
 			var finalCallback = function() {
-				context.isWaiting = false
 				extend(context.target.style, emptyStyle)
-				extend(context.state, {
-					direction: '',
-					axis: '',
-					translateX: 0,
-					translateY: 0,
-				})
+				extend(context.state, defaultOffsetState)
 				context.isWaiting = false
 				callback && callback()
 			}
-			this.isWaiting = true
 			return this.animateTo(0, 0, finalCallback)
 		},
 		enable: function() {
 			addEvent(this.trigger, 'touchstart', this.handleTouchStart)
-			addEvent(this.document, 'touchmove', this.handleTouchMove)
-			addEvent(this.document, 'touchend', this.handleTouchEnd)
+			addEvent(document, 'touchmove', this.handleTouchMove)
+			addEvent(document, 'touchend', this.handleTouchEnd)
 		},
 		disable: function() {
 			removeEvent(this.trigger, 'touchstart', this.handleTouchStart)
-			removeEvent(this.document, 'touchmove', this.handleTouchMove)
-			removeEvent(this.document, 'touchend', this.handleTouchEnd)
+			removeEvent(document, 'touchmove', this.handleTouchMove)
+			removeEvent(document, 'touchend', this.handleTouchEnd)
 		},
 		preventDefault: function() {
 			this.isPreventDefault = true
 		},
- 		getScrollInfo: function() {
-			var scrollInfo = null
-			if (this.isGlobalScroller) {
-				scrollInfo = getGlobalScrllInfo(this.document)
-			} else {
-				scrollInfo = getScrollInfo(this.scroller)
-			}
-			if (this.props.isStatic) {
-				scrollInfo = extend(scrollInfo, staticScrollStatus)
-			}
-			return scrollInfo
+		getScrollInfo: function() {
+			return getScrollEndingInfo(this.scroller, this.isGlobalScroller)
 		},
-		stopPropagationIfNeed: function(event) {
-			if (this.props.stopPropagation) {
-				event.stopPropagation()
-			}
+		isActiveAction: function(action) {
+			var options = this.options
+			var eventName = eventMap[action]
+			return options[eventName] || options[eventName + 'End'] || options[action]
 		},
-		detectScrollIfNeed: function() {
-			var props = this.props
-			if (!props.isStatic && props.detectScroll) {
-				extend(this.state, this.getScrollInfo())
-			}
-		},
-		isActiveDirection: function(direction) {
-			var props = this.props
-			return props[eventMap[direction]] || props[eventMap[direction] + 'End'] || props[direction]
-		},
-		emit: function(type, event) {
-			var listener = this.props[type]
+		emit: function(eventName) {
+			var listener = this.options[eventName]
 			if (!isFunction(listener)) {
 				return
 			}
-			return listener.call(this, this.state, event)
+			var state = this.state
+			var data = {
+				translateX: state.translateX,
+				translateY: state.translateY,
+			}
+			listener.call(this, data)
 		},
 		handleTouchStart: function(event) {
 			if (this.isTouching || this.isWaiting) {
 				return
 			}
+			var options = this.options
 			var coor = getCoor(event)
-			extend(this.state, this.getScrollInfo(), {
+
+			extend(this.state, {
 				clientX: coor.x,
 				clientY: coor.y,
 				axis: '',
-				direction: '',
+				action: '',
 			})
-			this.stopPropagationIfNeed(event)
+			
+			if (options.detectScroll || options.detectScrollOnStart) {
+				extend(this.state, this.getScrollInfo())
+			}
+
+			if (options.stopPropagation) {
+				event.stopPropagation()
+			}
+
 			this.isTouching = true
 		},
 		handleTouchMove: function(event) {
@@ -346,7 +328,7 @@
 				return
 			}
 			var coor = getCoor(event)
-			var props = this.props
+			var options = this.options
 			var state = this.state
 			var clientX = coor.x
 			var clientY = coor.y
@@ -355,53 +337,61 @@
 			var translateX = state.translateX
 			var translateY = state.translateY
 			var axis = state.axis
-			var direction = state.direction
-
-			this.detectScrollIfNeed()
+			var action = state.action
 
 			// only check the axis once
 			if (!axis) {
 				axis = Math.abs(deltaY) >= Math.abs(deltaX) ? 'y' : 'x'
 			}
 
-			// only check the direction once
-			if (!direction) {
+			// only check the action once
+			if (!action) {
 				if (axis === 'y') {
-					if (state.isScrollTopEnd && deltaY > 0) {
-						direction = 'top'
-					} else if (state.isScrollBottomEnd && deltaY < 0) {
-						direction = 'bottom'
+					if (deltaY > 0) {
+						action = 'pullDown'
+					} else if (deltaY < 0) {
+						action = 'pullUp'
 					}
 				} else if (axis === 'x') {
-					if (state.isScrollLeftEnd && deltaX > 0) {
-						direction = 'left'
-					} else if (state.isScrollRightEnd && deltaX < 0) {
-						direction = 'right'
+					if (deltaX > 0) {
+						action = 'pullRight'
+					} else if (deltaX < 0) {
+						action = 'pullLeft'
 					}
 				}
 			}
 
-			var isActiveDirection = this.isActiveDirection(direction)
+			var isActiveAction = this.isActiveAction(action)
 
-			if (isActiveDirection) {
-				translateX += transformValueByDamping(deltaX, props.damping)
-				translateY += transformValueByDamping(deltaY, props.damping)
+			if (
+				isActiveAction &&
+				(options.detectScroll || options.detectScrollOnMove) &&
+				!state[propMap[action]]
+			) {
+				extend(state, this.getScrollInfo())
+			}
+
+			var isActiveAndEnging = isActiveAction && state[propMap[action]]
+
+			if (isActiveAndEnging) {
+				translateX += transformValueByDamping(deltaX, options.damping)
+				translateY += transformValueByDamping(deltaY, options.damping)
 			}
 			
-			extend(this.state, {
+			extend(state, {
 				clientX: clientX,
 				clientY: clientY,
 				translateX: translateX,
 				translateY: translateY,
-				direction: direction,
+				action: action,
 				axis: axis,
 			})
 
-			if (!isActiveDirection) {
+			if (!isActiveAndEnging) {
 				return
 			}
 
-			if (!props.drag) {
+			if (!options.drag) {
 				if (axis === 'y') {
 					translateX = 0
 				} else if (axis === 'x') {
@@ -409,30 +399,32 @@
 				}
 			}
 
-			this.emit(eventMap[direction], event)
+			this.emit(eventMap[action])
 			if (this.isPreventDefault) {
 				this.isPreventDefault = false
 				return
 			}
 
-			if (props.wait) {
+			if (options.wait) {
 				this.isWaiting = true
 			}
+
 			event.preventDefault()
 			this.setTranslate(translateX, translateY)
 		},
-		handleTouchEnd: function(event) {
+		handleTouchEnd: function() {
 			if (!this.isTouching) {
 				return
 			}
 			this.isTouching = false
 
-			var direction = this.state.direction
-			if (!direction || !this.isActiveDirection(direction)) {
+			var state = this.state
+			var action = state.action
+			if (!this.isActiveAction(action) || !state[propMap[action]]) {
 				return
 			}
 
-			this.emit(eventMap[direction] + 'End', event)
+			this.emit(eventMap[action] + 'End')
 			if (this.isPreventDefault) {
 				this.isPreventDefault = false
 				return

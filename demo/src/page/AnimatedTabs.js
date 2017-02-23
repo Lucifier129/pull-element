@@ -6,7 +6,6 @@ export default class AnimatedTabs extends Component {
 		let { target, tabs } = this.refs
 		this.pullElement = new PullElement({
 			target: target,
-			isStatic: true,
 		})
 		this.pullElement.init()
 		this.pullElement.disable()

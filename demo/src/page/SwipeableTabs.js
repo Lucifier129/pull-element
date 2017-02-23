@@ -26,7 +26,6 @@ export default class SwipeableTabs extends Component {
 		}
 		this.pullElement = new PullElement({
 			target: target,
-			isStatic: true,
 			wait: false,
 			onPullLeftEnd: handlePullEnd,
 			onPullRightEnd: handlePullEnd,

@@ -9,10 +9,11 @@ export default class SliderHorizontal extends Component {
 		let activeIndex = 0
 		let handlePullEnd = function({ translateX }) {
 			this.preventDefault()
-			let diff = activeIndex + translateX / clientWidth
-			if (diff > 0.2) {
+			let prevTranslateX = -clientWidth * activeIndex
+			let diff = translateX - prevTranslateX
+			if (diff > 50) {
 				activeIndex -= 1
-			} else if (diff < -0.2) {
+			} else if (diff < -50) {
 				activeIndex += 1
 			}
 			if (activeIndex < 0){
@@ -24,7 +25,6 @@ export default class SliderHorizontal extends Component {
 		}
 		this.pullElement = new PullElement({
 			target: target,
-			isStatic: true,
 			wait: false,
 			onPullLeftEnd: handlePullEnd,
 			onPullRightEnd: handlePullEnd,
