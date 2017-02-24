@@ -234,26 +234,19 @@
 			var transitionDuration = this.transitionDuration
 			var transitionStyle = this.transitionStyle
 			var translateStyle = getTranslateStyle(translateX, translateY)
-			var createTransitionEndHandler = function(resolve) {
-				var isCalled = false
-				var handleTransitionEnd = function() {
-					if (!isCalled) {
-						isCalled = true
-						callback && callback()
-						resolve && resolve()
-					}
-				}
-				extend(target.style, transitionStyle, translateStyle)
-				setTimeout(handleTransitionEnd, transitionDuration)
-			}
 
 			state.translateX = translateX
 			state.translateY = translateY
 
-			if (isSupportPromise) {
-				return new Promise(createTransitionEndHandler)
+			var createTransitionEndHandler = function(callback) {
+				extend(target.style, transitionStyle, translateStyle)
+				setTimeout(callback, transitionDuration)
 			}
-			createTransitionEndHandler()
+
+			if (isSupportPromise) {
+				return new Promise(createTransitionEndHandler).then(callback)
+			}
+			createTransitionEndHandler(callback)
 		},
 		animateToOrigin: function(callback) {
 			this.isWaiting = true
