@@ -151,7 +151,6 @@
 		pullRight: false,
 		detectScroll: false,
 		detectScrollOnStart: false,
-		detectScrollOnMove: false,
 		stopPropagation: false,
 		drag: false,
 		transitionProperty: 'transform',
@@ -356,11 +355,7 @@
 
 			var isActiveAction = this.isActiveAction(action)
 
-			if (
-				isActiveAction &&
-				(options.detectScroll || options.detectScrollOnMove) &&
-				!state[propMap[action]]
-			) {
+			if (isActiveAction && options.detectScroll && !state[propMap[action]]) {
 				extend(state, this.getScrollInfo())
 			}
 

@@ -8,17 +8,18 @@ import SwipeableTabs from './page/SwipeableTabs'
 import SliderHorizontal from './page/SliderHorizontal'
 import VerticalSwiper from './page/VerticalSwiper'
 import SpaceBetweenSlides from './page/SpaceBetweenSlides'
-
+import Playground from './page/Playground'
 
 const components = {
 	'/': Home,
+	'playground': Playground,
 	'pull-to-refresh': PullToRefresh,
 	'swipe-to-show-action': SwipeToShowAction,
 	'animated-tabs': AnimatedTabs,
 	'swipeable-tabs': SwipeableTabs,
 	'slider-horizontal': SliderHorizontal,
 	'vertical-swiper': VerticalSwiper,
-	'space-between-slides': SpaceBetweenSlides
+	'space-between-slides': SpaceBetweenSlides,
 }
 
 function renderView() {

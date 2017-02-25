@@ -16,6 +16,7 @@ export default function Menu({ hash }) {
 	                    <div className="content-block-title">Pull-Element Kitchen Sink</div>
 	                    <div className="list-block">
 	                    	<ul>
+	                    		<ListItem href="#playground" text="Pull Element Playground" iconText="P" />
 	                    		<ListItem href="#pull-to-refresh" text="Pull To Refresh" iconText="P" />
 	                    		<ListItem href="#swipe-to-show-action" text="Swipe To Show Action" iconText="S" />
 	                    		<ListItem href="#animated-tabs" text="Animated Tabs" iconText="A" />

@@ -3,7 +3,7 @@ import Header from '../component/Header'
 import PullElement from '../../../'
 import delay from '../util/delay'
 
-export default function PullToRefresh({ hash }) {
+export default function PullToRefresh() {
 	return (
 	<div className="views">
 	    <div className="view view-main">
