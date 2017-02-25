@@ -45,10 +45,10 @@
 			scrollTop = documentBody.scrollTop || documentElement.scrollTop
 			scrollLeft = documentBody.scrollLeft || documentElement.scrollLeft
 		} else {
-			scrollTop = scroller.scrollTop
-			scrollLeft = scroller.scrollLeft
 			offsetWidth = scroller.offsetWidth
 			offsetHeight = scroller.offsetHeight
+			scrollTop = scroller.scrollTop
+			scrollLeft = scroller.scrollLeft
 		}
 
 		return {
@@ -90,7 +90,7 @@
 	}
 
 	function getTranslateStyle(translateX, translateY) {
-		var translateValue = 'translate(' + translateX + 'px,' + translateY + 'px)'
+		var translateValue = 'translate(' + translateX + 'px,' + translateY + 'px) translateZ(0)'
 		return {
 			transform: translateValue,
 			webkitTransform: translateValue,
