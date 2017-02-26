@@ -83,7 +83,7 @@
 		if (isFunction(damping)) {
 			return damping(value)
 		}
-		if (isNumber(damping)) {
+		if (isNumber(damping) && !isNaN(damping)) {
 			return value / damping
 		}
 		return value
@@ -262,11 +262,13 @@
 			addEvent(this.trigger, 'touchstart', this.handleTouchStart)
 			addEvent(document, 'touchmove', this.handleTouchMove)
 			addEvent(document, 'touchend', this.handleTouchEnd)
+			addEvent(document, 'touchcancel', this.handleTouchEnd)
 		},
 		disable: function() {
 			removeEvent(this.trigger, 'touchstart', this.handleTouchStart)
 			removeEvent(document, 'touchmove', this.handleTouchMove)
 			removeEvent(document, 'touchend', this.handleTouchEnd)
+			removeEvent(document, 'touchcancel', this.handleTouchEnd)
 		},
 		preventDefault: function() {
 			this.isPreventDefault = true
@@ -279,17 +281,11 @@
 			var eventName = eventMap[action]
 			return options[eventName] || options[eventName + 'End'] || options[action]
 		},
-		emit: function(eventName) {
+		emit: function(eventName, data) {
 			var listener = this.options[eventName]
-			if (!isFunction(listener)) {
-				return
+			if (isFunction(listener)) {
+				listener.call(this, data)
 			}
-			var state = this.state
-			var data = {
-				translateX: state.translateX,
-				translateY: state.translateY,
-			}
-			listener.call(this, data)
 		},
 		handleTouchStart: function(event) {
 			if (this.isTouching || this.isWaiting) {
@@ -357,6 +353,10 @@
 
 			if (isActiveAction && options.detectScroll && !state[propMap[action]]) {
 				extend(state, this.getScrollInfo())
+				if (state[propMap[action]]) {
+					deltaX = 0
+					deltaY = 0
+				}
 			}
 
 			var isActiveAndEnging = isActiveAction && state[propMap[action]]
@@ -387,7 +387,11 @@
 				}
 			}
 
-			this.emit(eventMap[action])
+			this.emit(eventMap[action], {
+				translateX: translateX,
+				translateY: translateY,
+			})
+
 			if (this.isPreventDefault) {
 				this.isPreventDefault = false
 				return
@@ -412,7 +416,11 @@
 				return
 			}
 
-			this.emit(eventMap[action] + 'End')
+			this.emit(eventMap[action] + 'End', {
+				translateX: state.translateX,
+				translateY: state.translateY,
+			})
+			
 			if (this.isPreventDefault) {
 				this.isPreventDefault = false
 				return

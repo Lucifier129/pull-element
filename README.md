@@ -1,2 +1,3 @@
 # pull-element
-Pull element in four directions
+
+Lightweight, high-performance and smooth pull element effect that support all directions.

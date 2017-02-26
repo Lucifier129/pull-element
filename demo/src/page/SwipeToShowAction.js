@@ -56,7 +56,14 @@ class SwipeToShowAction extends Component {
 			onPullRight({ translateX }) {
 				if (translateX >= 0) {
 					this.preventDefault()
+					this.setTranslate(0, 0)
 				}
+			},
+			onPullLeft({ translateX }) {
+				if (-translateX > 109) {
+					this.preventDefault()
+					this.setTranslate(-109, 0)
+				} 
 			},
 			onPullLeftEnd({ translateX }) {
 				if (-translateX >= 30) {
