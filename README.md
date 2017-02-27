@@ -29,7 +29,7 @@ var PullElement = require('pull-element')
 
 ## 使用案例
 
-注意：以下 DEMO 收到了 [framework7](http://framework7.io/kitchen-sink-ios/) 的启发。
+注意：以下 DEMO 受到了 [framework7](http://framework7.io/kitchen-sink-ios/) 的启发。
 
 - Playgound: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/Playground.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#playground)
 - Pull To Refresh: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/PullToRefresh.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#pull-to-refresh)
