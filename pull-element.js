@@ -248,7 +248,6 @@
 			createTransitionEndHandler(callback)
 		},
 		animateToOrigin: function(callback) {
-			this.isWaiting = true
 			var context = this
 			var finalCallback = function() {
 				extend(context.target.style, emptyStyle)
