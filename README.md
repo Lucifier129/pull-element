@@ -1,6 +1,6 @@
 # pull-element
 
-轻量且高性能，流畅的触摸拖动元素的交互效果，支持上下左右所有方向。
+流畅的触摸拖动元素的交互效果，无依赖、轻量且高性能，支持上下左右所有方向。
 
 ## 使用方式
 
@@ -21,7 +21,7 @@ var PullElement = require('pull-element')
 使用 script 标签
 
 ```html
-<script src="pull-element"></script>
+<script src="pull-element.js"></script>
 <script>
 	var pullElement = new PullElement({})
 </script>
@@ -29,12 +29,12 @@ var PullElement = require('pull-element')
 
 ## 使用案例
 
-注意：以下 Demo 收到了 [framework7](http://framework7.io/kitchen-sink-ios/) 的启发。
+注意：以下 DEMO 收到了 [framework7](http://framework7.io/kitchen-sink-ios/) 的启发。
 
 - Playgound: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/Playground.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#playground)
 - Pull To Refresh: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/PullToRefresh.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#pull-to-refresh)
 - Swipe To Show Action: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SwipeToShowAction.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#swipe-to-show-action)
-- Animated Tabs: [源码](https://lucifier129.github.io/pull-element/demo/build/#animated-tabs)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#animated-tabs)
+- Animated Tabs: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/AnimatedTabs.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#animated-tabs)
 - Swipeable Tabs: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SwipeableTabs.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#swipeable-tabs)
 - Slider Horizontal: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SliderHorizontal.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#slider-horizontal)
 - Vertical Swiper: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/VerticalSwiper.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#vertical-swiper)
@@ -44,7 +44,7 @@ var PullElement = require('pull-element')
 
 ### new PullElement(options)
 
-PullElement 是一个构造函数，接受一个 options 配置项，使用 new 关键字进行实例化。
+PullElement 是一个构造函数，接受一个 options 配置项参数，使用 new 关键字进行实例化。
 
 实例化后，调用 init 方法进行初始化。
 
@@ -115,7 +115,7 @@ detectScroll 配置既在 touchStart 时检测，也在 touchMove 时检测；�
 
 是否在 touchStart 时停止事件冒泡，默认为 false。
 
-该配置项的作用在于，嵌套两个 pull-element 效果时，如果子元素可以独立，其拖动效果不影响父元素。
+该配置项的作用在于，嵌套两个 pull-element 效果时，子元素可以独立，其拖动效果不影响父元素。
 
 ### options.drag: boolean
  

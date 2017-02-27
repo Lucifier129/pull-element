@@ -1,6 +1,6 @@
 {
   "name": "pull-element",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Pull element in four directions",
   "main": "pull-element.js",
   "scripts": {
