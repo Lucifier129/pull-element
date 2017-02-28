@@ -10,6 +10,8 @@ import VerticalSwiper from './page/VerticalSwiper'
 import SpaceBetweenSlides from './page/SpaceBetweenSlides'
 import Playground from './page/Playground'
 
+Array.from = Array.from || ((obj) => Array.prototype.slice.call(obj))
+
 const components = {
 	'/': Home,
 	'playground': Playground,
