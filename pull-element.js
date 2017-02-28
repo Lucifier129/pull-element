@@ -1,6 +1,6 @@
 /*!
  * @license
- * pull-element.js v1.1.0
+ * pull-element.js v1.1.1
  * (c) 2017 Jade Gu
  * Released under the MIT License.
  * https://github.com/Lucifier129/pull-element
