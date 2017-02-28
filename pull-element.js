@@ -83,7 +83,7 @@
 		if (isFunction(damping)) {
 			return damping(value)
 		}
-		if (isNumber(damping) && !isNaN(damping)) {
+		if (isNumber(damping)) {
 			return value / damping
 		}
 		return value
