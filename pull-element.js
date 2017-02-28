@@ -63,8 +63,8 @@
 		return typeof elem === 'string' ? document.querySelector(elem) : elem
 	}
 
-	function addEvent(elem, type, handler) {
-		elem.addEventListener(type, handler)
+	function addEvent(elem, type, handler, options) {
+		elem.addEventListener(type, handler, options)
 	}
 
 	function removeEvent(elem, type, handler) {
@@ -95,6 +95,11 @@
 			transform: translateValue,
 			webkitTransform: translateValue,
 		}
+	}
+
+	// https://developers.google.com/web/updates/2017/01/scrolling-intervention
+	var eventHandlerOptions = {
+		passive: false,
 	}
 
 	var emptyStyle = {
@@ -259,13 +264,13 @@
 		},
 		enable: function() {
 			addEvent(this.trigger, 'touchstart', this.handleTouchStart)
-			addEvent(document, 'touchmove', this.handleTouchMove)
+			addEvent(document, 'touchmove', this.handleTouchMove, eventHandlerOptions)
 			addEvent(document, 'touchend', this.handleTouchEnd)
 			addEvent(document, 'touchcancel', this.handleTouchEnd)
 		},
 		disable: function() {
 			removeEvent(this.trigger, 'touchstart', this.handleTouchStart)
-			removeEvent(document, 'touchmove', this.handleTouchMove)
+			removeEvent(document, 'touchmove', this.handleTouchMove, eventHandlerOptions)
 			removeEvent(document, 'touchend', this.handleTouchEnd)
 			removeEvent(document, 'touchcancel', this.handleTouchEnd)
 		},
