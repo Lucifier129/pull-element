@@ -10,7 +10,7 @@
 - 灵活，支持上下左右所有方向
 
 ## 文档
-[中文](./README.zh-cn.md) [English](./READMEmd)
+[English](./README.md)
 
 ## 使用方式
 
