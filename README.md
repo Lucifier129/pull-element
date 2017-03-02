@@ -70,7 +70,7 @@ pullElement.init()
 
 `target` can be a selector or a dom-element, the default value is `'body'`
 
-`target` is used to be the target who will be seted `transform|translate` style when user is touching.
+`target` is used to be the target who will be setted `transform|translate` style when user is touching.
 
 ### options.scroller: selector|element
 
@@ -92,7 +92,7 @@ When user is touching the `trigger`, it occur the pull element effect.
 
 If the duration of touch is `x`, and the `damping` is `y`, then the `translate` d is: `d = x/y`.
 
-If `damping` is a function ,then d is: `d = y(x)`.
+If `damping` is a function ,then `d` is: `d = y(x)`.
 
 ### options.pullUp: boolean
 
@@ -134,7 +134,7 @@ This option is used to support nesting pull-element effect.
 
 Enable drag effect, the default value is `fasle`
 
-The default behavior of pulling element is only one axis, and the other axis will be seted to zero.
+The default behavior of pulling element is only in one axis, and translate-value of the other axis will be setted to zero.
 
 If this option is `true`, the `target` will translate in both x-axis and y-axis.
 
@@ -166,7 +166,7 @@ The `function` will receive one argument `data` when user pulling the elment.
 
 `data` is an object. it has two property `translateX|translateY`, both of them were calculated by `damping`.
 
-If the `function` has called method `this.preventDefault()`, it will prevent the default behavior. In this case, `target` will not be seted `translate` style.
+If the `function` has called method `this.preventDefault()`, it will prevent the default behavior. In this case, `target` will not be setted `translate` style.
 
 ```javascript
 var pullElement = new PullElement({
