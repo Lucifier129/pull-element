@@ -22,10 +22,10 @@ export default function Playground() {
 class Content extends Component {
 	state = {
 		damping: 1.6,
-		pullUp: true,
+		pullUp: false,
 		pullDown: true,
-		pullLeft: true,
-		pullRight: true,
+		pullLeft: false,
+		pullRight: false,
 		detectScroll: true,
 		detectScrollOnStart: false,
 		detectScrollOnMove: false,

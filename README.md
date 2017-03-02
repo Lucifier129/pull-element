@@ -1,24 +1,36 @@
 # pull-element
 
-流畅的触摸拖动元素的交互效果，无依赖、轻量且高性能，支持上下左右所有方向。
+Lightweight, high-performance and smooth pull element effect that support all directions
 
-## 使用方式
+## Features
 
-使用 npm 下载
+- Lightweight, 6kb
+- High performance, native scrolling, 60fps
+- No dependent, just vanilla.js
+- flexible, support `top|right|down|left` all the directions
+
+## Documentation
+[English](./READMEmd) [中文](./README.zh-cn.md)
+
+## Installtion
+
+With npm
 
 ```shell
 npm install --save pull-element
 ```
 
+How to import `pull-element`
+
 ```javascript
-// ES2015
+// ES2015 style
 import PullElement from 'pull-element'
 
-// commonjs
+// commonjs style
 var PullElement = require('pull-element')
 ```
 
-使用 script 标签
+With script tag
 
 ```html
 <script src="pull-element.js"></script>
@@ -27,127 +39,135 @@ var PullElement = require('pull-element')
 </script>
 ```
 
-## 使用案例
+## DEMO
 
-注意：以下 DEMO 受到了 [framework7](http://framework7.io/kitchen-sink-ios/) 的启发。
+Note: these demo were inspired by [framework7](http://framework7.io/kitchen-sink-ios/)
 
-- Playgound: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/Playground.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#playground)
-- Pull To Refresh: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/PullToRefresh.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#pull-to-refresh)
-- Swipe To Show Action: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SwipeToShowAction.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#swipe-to-show-action)
-- Animated Tabs: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/AnimatedTabs.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#animated-tabs)
-- Swipeable Tabs: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SwipeableTabs.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#swipeable-tabs)
-- Slider Horizontal: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SliderHorizontal.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#slider-horizontal)
-- Vertical Swiper: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/VerticalSwiper.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#vertical-swiper)
-- Space Between Slides: [源码](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SpaceBetweenSlides.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#space-between-slides)
+- Playgound: [view-source](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/Playground.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#playground)
+- Pull To Refresh: [view-source](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/PullToRefresh.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#pull-to-refresh)
+- Swipe To Show Action: [view-source](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SwipeToShowAction.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#swipe-to-show-action)
+- Animated Tabs: [view-source](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/AnimatedTabs.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#animated-tabs)
+- Swipeable Tabs: [view-source](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SwipeableTabs.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#swipeable-tabs)
+- Slider Horizontal: [view-source](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SliderHorizontal.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#slider-horizontal)
+- Vertical Swiper: [view-source](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/VerticalSwiper.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#vertical-swiper)
+- Space Between Slides: [view-source](https://github.com/Lucifier129/pull-element/blob/master/demo/src/page/SpaceBetweenSlides.js)，[DEMO](https://lucifier129.github.io/pull-element/demo/build/#space-between-slides)
 
-## 用法
+## API
 
 ### new PullElement(options)
 
-PullElement 是一个构造函数，接受一个 options 配置项参数，使用 new 关键字进行实例化。
+PullElement is a constructor function, receive an argument `options` which should be an object.
 
-实例化后，调用 init 方法进行初始化。
+Use the keyword `new` to get its instance, and then call the `init` method to initialize.
 
 ```javascript
 var pullElement = new PullElement(options)
 pullElement.init()
 ```
 
-## options 参数的配置项
+## Options
 
 ### options.target: selector|element
 
-被拖动的目标，可以是选择器，也可以是元素；默认值为 'body'。 
+`target` can be a selector or a dom-element, the default value is `'body'`
 
-target 元素就是被设置 transform|translate 效果的 dom 对象。
+`target` is used to be the target who will be seted `transform|translate` style when user is touching.
 
 ### options.scroller: selector|element
 
-滚动对象，可以是选择器，也可以是元素。如果不配置，默认复用 target 元素作为 scroller。
+`scroller` can be a selector or a dom-element, if it's empty, then the `target` will be the `scroller`
 
-这个选项在设置了 `detectScroll: true` 或 `detectScrollOnStart: true` 之后，才有作用。
+This option must works with other options `detectScroll|detectScrollOnStart`.
 
-只有滚动到边缘之后，才开始拖动元素。
+If one of `detectScroll|detectScrollOnStart` is `true`, the `target` will only translate when `scroller` reach the ending.
 
 ### options.trigger: selector|element
 
-触发对象，可以是选择器，也可以是元素。如果不配置，默认复用 target 元素作为 trigger。
+`trigger` can be a selector or a dom-element, if it's empty, then the `target` will be the `trigger`.
 
-只有触摸 trigger 区域，才会触发拖动元素的效果。
+When user is touching the `trigger`, it occur the pull element effect. 
 
 ### options.damping: number|function
 
-拖动元素的阻尼系数，可以是数字，也可以是函数，默认值为 1.6。
+`damping` can be a number or a function, the default value is `1.6`.
 
-设用户拖动长度为 x， damping 系数为 y，则元素的拖动长度 d 的计算方式为：d = x/y。
+If the duration of touch is `x`, and the `damping` is `y`, then the `translate` d is: `d = x/y`.
 
-如果 damping 为函数，则 d = y(x)。
+If `damping` is a function ,then d is: `d = y(x)`.
 
 ### options.pullUp: boolean
 
-是否开启上拉拖动效果，默认为 false。
+Enable pulling element up, the default value is `false`.
 
 ### options.pullDown: boolean
 
-是否开启下拉拖动效果，默认为 false。
+Enable pulling element down, the default value is `false`.
 
 ### options.pullLeft: boolean
 
-是否开启左拉拖动效果，默认为 false。
+Enable pulling element left, the default value is `false`.
 
 ### options.pullRight: boolean
 
-是否开启右拉拖动效果，默认为 false。
+Enable pulling element right, the default value is `false`.
 
 ### options.detectScroll: boolean
 
-是否开启监听滚动特性，默认为 false。
+Enable detect scroller status, the default value is `false`.
 
-开启后，只有检测 scroller 元素滚动到边缘之后，才开始拖动元素。
+When `detectScroll` is `true`, it will start pulling element when the `scroller` reached the ending.
+
+If this option is `true`, it will detech scroll status on both `touchstart` and `touchmove`.
 
 ### options.detectScrollOnStart: boolean
 
-是否开启在 touchStart 时检测滚动状态的特性，默认为 false。
+Enable detech scroller status on `touchstart`, the default value is `false`.
 
-detectScroll 配置既在 touchStart 时检测，也在 touchMove 时检测；当 detectScroll 为 false，detectScrollOnStart 为 true 时，将只在 touchStart 时检测滚动状态。
+If this option is `true`, and `detectScroll` option is `false`,  it will only detech scroll status on `touchstart` event.
 
 ### options.stopPropagation: boolean
 
-是否在 touchStart 时停止事件冒泡，默认为 false。
+Enable `stopPropagation` on `touchstart`, the default value is `false`
 
-该配置项的作用在于，嵌套两个 pull-element 效果时，子元素可以独立，其拖动效果不影响父元素。
+This option is used to support nesting pull-element effect.
 
 ### options.drag: boolean
- 
-是否开启自由拖动效果，默认为 false。
 
-开启后，target 元素的拖动不再只能是 X 轴或 Y 轴（默认行为是：其中一个轴的 translate 值被设置为 0），它将在 X 轴和 Y 轴都有偏移效果。
+Enable drag effect, the default value is `fasle`
+
+The default behavior of pulling element is only one axis, and the other axis will be seted to zero.
+
+If this option is `true`, the `target` will translate in both x-axis and y-axis.
 
 ### options.transitionDuration: string
 
-target 元素回归原点的过渡时长，默认为 0.3s。
+The duration of transition, the default value is `0.3s`
 
-结束拖动，即释放 target 元素时，target 元素将默认滚动回原点。
+When user stop touching, the default behavior is that `target` animate to the origin.
 
 ### options.transitionTimingFunction: string
 
-target 元素回归原点的过渡函数，默认为 ease-out。
+The timing function of transition, the default value is `ease-out`
 
-结束拖动，即释放 target 元素时，target 元素将默认滚动回原点。
+When user stop touching, the default behavior is that `target` animate to the origin.
 
 ### options.wait: boolean
 
-是否在拖动结束时，等待回归原点后才允许再次拖动，默认为 true。
+Enable wait for animating to the origin, the default value is `true`.
 
-如果设置为 false，在过渡回原点时，也可以被重新拖动。
+When user stop touching, the default behavior is that `target` animate to the origin, the `trigger` will not response the touching event in this time.
+
+If this options is `false`, user can touch the `trigger` again.
 
 ### options.onPull{Direction}: function
 
-开启并响应某个方向的拖动事件，Direction 可以为 Up|Down|Left|Right。
+Enable and response the `Direction` of pulling, `Direction` can be one of `Up|Down|Left|Right`.
 
-接受一个参数：data。data 参数包含两个字段，translateX 和 translateY，分别是 X 轴和 Y 轴的偏移值，该值已经经过了 damping 的折算。
+The `function` will receive one argument `data` when user pulling the elment.
 
-如果在该方法里调用 this.preventDefault() 方法，将阻止默认行为，即 target 元素在此次事件里不会被设置偏移。
+`data` is an object. it has two property `translateX|translateY`, both of them were calculated by `damping`.
+
+If the `function` has called method `this.preventDefault()`, it will prevent the default behavior. In this case, `target` will not be seted `translate` style.
 
 ```javascript
 var pullElement = new PullElement({
@@ -162,11 +182,13 @@ pullElement.init()
 
 ### options.onPull{Direction}End: function
 
-开启并响应某个方向的拖动结束事件，Direction 可以为 Up|Down|Left|Right。
+Enable the `Direction` of pulling, and response the event of stop pulling, `Direction` can be one of `Up|Down|Left|Right`.
 
-接受一个参数：data。data 参数包含两个字段，translateX 和 translateY，分别是 X 轴和 Y 轴的偏移值，该值已经经过了 damping 的折算。
+The `function` will receive one argument `data` when user pulling the elment.
 
-如果在该方法里调用 this.preventDefault() 方法，将阻止默认行为，即 target 元素不会自动过渡回原点。
+`data` is an object. it has two property `translateX|translateY`, both of them were calculated by `damping`.
+
+If the `function` has called method `this.preventDefault()`, it will prevent the default behavior. In this case, `target` will not animate to origin.
 
 ```javascript
 var pullElement = new PullElement({
@@ -179,54 +201,51 @@ var pullElement = new PullElement({
 pullElement.init()
 ```
 
-## 实例方法
+## Methods
 
 ### pullElement.init()
 
-初始化 PullElement 实例，该方法将绑定 touch 事件。
+Initialize the pull-element effect, and add touch event listeners.
 
 ### pullElement.destroy()
 
-销毁 PullElement 事例，该方法将解除 touch事件。
+Destroy the instance of `PullElement`, and remove touch event listeners.
 
 ### pullElement.enable()
 
-开启对 touch 事件的响应能力，即绑定 touch 事件。在 init 方法里会调用。
-
-可以用该方法主动开启 touch 绑定。
+Add touch event listeners.
 
 ### pullElement.disable()
 
-关闭对 touch 事件的响应能力，即解除 touch 事件。在 destroy 方法里会调用。
-
-可以用该方法主动关闭 touch 绑定。
+Remove touch event listeners.
 
 ### pullElement.setTranslate(translateX, translateY)
 
-设置 target 元素的偏移值，参数 translateX 和 translateY 都是 number 数值类型。
+Set `translate style` of `target`, `translateX` and `translateY` must be number.
 
-该方法用于在调用 this.preventDefault() 方法后，手动设置偏移值。
+You can use this method to set `translate style` directly after calling `this.preventDefault()`.
 
 ### pullElement.animateTo(translateX, translateY, callback)
 
-以过渡的动画形式设置偏移值，前两个参数跟 setTranslate 方法一致，第三个参数为动画结束后触发的 callback 函数。
+Animate to some where, `translateX` and `translateY` is the same type in `setTranslate`.
 
-该方法在支持 promise 的浏览器里会返回 promise。
+The third argument `callback` is a function, it will be invoked when animation has been over.
+
+If `es6-promise` is supported, this method will return a promise, so you can use `async/await` or `then` method to handle the ending of animation.
 
 ### pullElement.animateToOrigin(callback)
 
-以过渡的动画形式回归到原点，第一个参数为动画结束后触发的 callback 函数。
+Animate to origin, it's equal to `this.animateTo(0, 0, callback)`, but more, see below.
 
-该方法在支持 promise 的浏览器里会返回 promise。
+If option `wait` is `true`, it will call `animateToOrigin` automatically after `pull{Direction}End`(Note: If you call `this.preventDefault` in it, you should call `this.animateToOrigin` manually to stop waiting).
 
 ### pullElement.preventDefault()
 
-阻止默认行为。该方法必须在 onPull{Direction} 和 onPull{Direction}End 配置项里执行。
+Prevent the default behavior. This method should only be invoked by function `onPull{Direction}` or `onPull{Direction}End`
 
-当在 onPull{Direction} 里执行时，所阻止的默认行为是 `this.setTranslate(translateX, translateY)`
+When this method is invoked by `onPull{Direction}`, the default behavior is `this.setTranslate(translateX, translateY)`.
 
-当在 onPull{Direction}End 里执行时，所阻止的默认行为是 `this.animateToOrigin()`
-
+When this method is invoked by `onPull{Direction}End`, the default behavior is `this.animateToOrigin()`.
 
 ## License
 License: MIT (See LICENSE file for details)
