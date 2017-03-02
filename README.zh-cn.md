@@ -9,8 +9,7 @@
 - 无依赖，原生 javascript 编写
 - 灵活，支持上下左右所有方向
 
-## 文档
-[English](./README.md)
+[English docs](./README.md)
 
 ## 使用方式
 

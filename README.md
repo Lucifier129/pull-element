@@ -9,8 +9,7 @@ Lightweight, high-performance and smooth pull element effect that support all di
 - No dependent, just vanilla.js
 - flexible, support `top|right|down|left` all the directions
 
-## Documentation
-[中文](./README.zh-cn.md)
+[中文版文档](./README.zh-cn.md)
 
 ## Installtion
 
