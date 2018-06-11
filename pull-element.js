@@ -226,6 +226,11 @@
 			this.disable()
 		},
 		setTranslate: function(translateX, translateY) {
+            var state = this.state
+
+            state.translateX = translateX
+            state.translateY = translateY
+
 			extend(
 				this.target.style,
 				emptyTransitionStyle,
