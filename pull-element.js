@@ -5,12 +5,14 @@
  * Released under the MIT License.
  * https://github.com/Lucifier129/pull-element
  */
-(function(global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-		typeof define === 'function' && define.amd ? define(factory) :
-		global.PullElement = factory();
-}(this, function() {
-	'use strict';
+;(function(global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined'
+		? (module.exports = factory())
+		: typeof define === 'function' && define.amd
+			? define(factory)
+			: (global.PullElement = factory())
+})(this, function() {
+	'use strict'
 
 	function extend(target) {
 		var args = arguments
@@ -55,7 +57,7 @@
 			isScrollTopEnd: scrollTop <= 0,
 			isScrollBottomEnd: offsetHeight + scrollTop >= scrollHeight,
 			isScrollLeftEnd: scrollLeft <= 0,
-			isScrollRightEnd: offsetWidth + scrollLeft >= scrollWidth,
+			isScrollRightEnd: offsetWidth + scrollLeft >= scrollWidth
 		}
 	}
 
@@ -75,7 +77,7 @@
 		var targetEvent = event.touches[0]
 		return {
 			x: targetEvent.clientX,
-			y: targetEvent.clientY,
+			y: targetEvent.clientY
 		}
 	}
 
@@ -90,59 +92,63 @@
 	}
 
 	function getTranslateStyle(translateX, translateY) {
-		var translateValue = 'translate(' + translateX + 'px,' + translateY + 'px) translateZ(0)'
+		var translateValue =
+			'translate(' + translateX + 'px,' + translateY + 'px) translateZ(0)'
 		return {
 			transform: translateValue,
-			webkitTransform: translateValue,
+			webkitTransform: translateValue
 		}
 	}
 
 	// https://developers.google.com/web/updates/2017/01/scrolling-intervention
 	var eventHandlerOptions = {
-		passive: false,
+		passive: false
 	}
 
 	var emptyStyle = {
 		transition: '',
 		transform: '',
 		webkitTransform: '',
-		webkitTransition: '',
+		webkitTransition: ''
 	}
 
 	var emptyTransitionStyle = {
 		transition: '',
-		webkitTransition: '',
+		webkitTransition: ''
 	}
 
 	var eventMap = {
 		pullDown: 'onPullDown',
 		pullUp: 'onPullUp',
 		pullRight: 'onPullRight',
-		pullLeft: 'onPullLeft',
+		pullLeft: 'onPullLeft'
 	}
 
 	var propMap = {
 		pullDown: 'isScrollTopEnd',
 		pullUp: 'isScrollBottomEnd',
 		pullRight: 'isScrollLeftEnd',
-		pullLeft: 'isScrollRightEnd',
+		pullLeft: 'isScrollRightEnd'
 	}
 
 	var defaultOffsetState = {
 		action: '',
 		axis: '',
 		translateX: 0,
-		translateY: 0,
+		translateY: 0
 	}
 
-	var defaultState = extend({
-		isScrollTopEnd: true,
-		isScrollLeftEnd: true,
-		isScrollBottomEnd: true,
-		isScrollRightEnd: true,
-		clientX: 0,
-		clientY: 0,
-	}, defaultOffsetState)
+	var defaultState = extend(
+		{
+			isScrollTopEnd: true,
+			isScrollLeftEnd: true,
+			isScrollBottomEnd: true,
+			isScrollRightEnd: true,
+			clientX: 0,
+			clientY: 0
+		},
+		defaultOffsetState
+	)
 
 	var defaultOptions = {
 		target: 'body',
@@ -160,7 +166,7 @@
 		drag: false,
 		transitionProperty: 'transform',
 		transitionDuration: '0.3s',
-		transitionTimingFunction: 'ease-out',
+		transitionTimingFunction: 'ease-out'
 	}
 
 	var isSupportPromise = typeof Promise === 'function'
@@ -186,34 +192,31 @@
 		init: function() {
 			var options = this.options
 			var target = getElem(options.target)
-			var scroller = options.scroller
-				? getElem(options.scroller)
-				: target
-			var trigger = options.trigger
-				? getElem(options.trigger)
-				: target
+			var scroller = options.scroller ? getElem(options.scroller) : target
+			var trigger = options.trigger ? getElem(options.trigger) : target
 
 			this.target = target
 			this.scroller = scroller
 			this.trigger = trigger
-			this.isGlobalScroller = (
+			this.isGlobalScroller =
 				scroller === document.body ||
 				scroller === window ||
 				scroller === document.documentElement
-			)
 			this.transitionStyle = {
 				transitionProperty: options.transitionProperty,
 				transitionDuration: options.transitionDuration,
 				transitionTimingFunction: options.transitionTimingFunction,
 				webkitTransitionProperty: options.transitionProperty,
 				webkitTransitionDuration: options.transitionDuration,
-				webkitTransitionTimingFunction: options.transitionTimingFunction,
+				webkitTransitionTimingFunction: options.transitionTimingFunction
 			}
 			/**
-			* in some browser, transitionend dose'nt work as expected
-			* use setTimeout instead
-			*/
-			var transitionDuration = Number(options.transitionDuration.replace(/[^.\d]+/g, ''))
+			 * in some browser, transitionend dose'nt work as expected
+			 * use setTimeout instead
+			 */
+			var transitionDuration = Number(
+				options.transitionDuration.replace(/[^.\d]+/g, '')
+			)
 
 			// transform 1s to 1000ms
 			if (/[\d\.]+s$/.test(options.transitionDuration)) {
@@ -226,11 +229,9 @@
 			this.disable()
 		},
 		setTranslate: function(translateX, translateY) {
-            var state = this.state
-
-            state.translateX = translateX
-            state.translateY = translateY
-
+			var state = this.state
+			state.translateX = translateX
+			state.translateY = translateY
 			extend(
 				this.target.style,
 				emptyTransitionStyle,
@@ -275,7 +276,12 @@
 		},
 		disable: function() {
 			removeEvent(this.trigger, 'touchstart', this.handleTouchStart)
-			removeEvent(document, 'touchmove', this.handleTouchMove, eventHandlerOptions)
+			removeEvent(
+				document,
+				'touchmove',
+				this.handleTouchMove,
+				eventHandlerOptions
+			)
 			removeEvent(document, 'touchend', this.handleTouchEnd)
 			removeEvent(document, 'touchcancel', this.handleTouchEnd)
 		},
@@ -307,9 +313,9 @@
 				clientX: coor.x,
 				clientY: coor.y,
 				axis: '',
-				action: '',
+				action: ''
 			})
-			
+
 			if (options.detectScroll || options.detectScrollOnStart) {
 				extend(this.state, this.getScrollInfo())
 			}
@@ -374,14 +380,14 @@
 				translateX += transformValueByDamping(deltaX, options.damping)
 				translateY += transformValueByDamping(deltaY, options.damping)
 			}
-			
+
 			extend(state, {
 				clientX: clientX,
 				clientY: clientY,
 				translateX: translateX,
 				translateY: translateY,
 				action: action,
-				axis: axis,
+				axis: axis
 			})
 
 			if (!isActiveAndEnging) {
@@ -398,7 +404,7 @@
 
 			this.emit(eventMap[action], {
 				translateX: translateX,
-				translateY: translateY,
+				translateY: translateY
 			})
 
 			if (this.isPreventDefault) {
@@ -427,17 +433,17 @@
 
 			this.emit(eventMap[action] + 'End', {
 				translateX: state.translateX,
-				translateY: state.translateY,
+				translateY: state.translateY
 			})
-			
+
 			if (this.isPreventDefault) {
 				this.isPreventDefault = false
 				return
 			}
 
 			this.animateToOrigin()
-		},
+		}
 	})
 
 	return PullElement
-}));
+})
