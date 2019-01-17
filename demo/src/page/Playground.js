@@ -29,6 +29,7 @@ class Content extends Component {
 		detectScroll: true,
 		detectScrollOnStart: false,
 		detectScrollOnMove: false,
+		detectBoundary: true,
 		drag: false,
 		transitionDuration: '0.3s',
 		transitionTimingFunction: 'ease-out',

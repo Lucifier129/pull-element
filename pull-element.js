@@ -1,6 +1,6 @@
 /*!
  * @license
- * pull-element.js v1.1.2
+ * pull-element.js v1.1.4
  * (c) 2017 Jade Gu
  * Released under the MIT License.
  * https://github.com/Lucifier129/pull-element
@@ -162,6 +162,7 @@
 		pullRight: false,
 		detectScroll: false,
 		detectScrollOnStart: false,
+		detectBoundary: false,
 		stopPropagation: false,
 		drag: false,
 		transitionProperty: 'transform',
@@ -302,6 +303,34 @@
 				listener.call(this, data)
 			}
 		},
+		detectBoundary: function(action, deltaX, deltaY, translateX, translateY) {
+			var isBoundary =  false
+
+			if (action === 'pullDown') {
+				if (translateY <= 0 && deltaY <= 0) {
+					isBoundary = true
+				}
+			} else if (action === 'pullUp') {
+				if (translateY >= 0 && deltaY >= 0) {
+					isBoundary = true
+				}
+			} else if (action == 'pullLeft') {
+				if (translateX >= 0 && deltaX >= 0) {
+					isBoundary = true
+				}
+			} else if (action === 'pullRight') {
+				if (translateX <= 0 && deltaX <= 0) {
+					isBoundary = true
+				}
+			}
+
+			if (isBoundary) {
+				this.handleTouchEnd()
+				return true
+			}
+
+			return false
+		},
 		handleTouchStart: function(event) {
 			if (this.isTouching || this.isWaiting) {
 				return
@@ -364,6 +393,11 @@
 				}
 			}
 
+			if (options.detectBoundary) {
+				var isBoundary = this.detectBoundary(action, deltaX, deltaY, translateX, translateY)
+				if (isBoundary) return
+			}
+
 			var isActiveAction = this.isActiveAction(action)
 
 			if (isActiveAction && options.detectScroll && !state[propMap[action]]) {
@@ -374,9 +408,9 @@
 				}
 			}
 
-			var isActiveAndEnging = isActiveAction && state[propMap[action]]
+			var isActiveAndEnding = isActiveAction && state[propMap[action]]
 
-			if (isActiveAndEnging) {
+			if (isActiveAndEnding) {
 				translateX += transformValueByDamping(deltaX, options.damping)
 				translateY += transformValueByDamping(deltaY, options.damping)
 			}
@@ -390,7 +424,7 @@
 				axis: axis
 			})
 
-			if (!isActiveAndEnging) {
+			if (!isActiveAndEnding) {
 				return
 			}
 

@@ -55,6 +55,7 @@ class Content extends Component {
 			target: target,
 			scroller: content,
 			detectScroll: true,
+			detectBoundary: true,
 			onPullDown({ translateY }) {
 				let classList = content.classList
 				if (translateY > 45) {
