@@ -9,27 +9,26 @@ import SliderHorizontal from './page/SliderHorizontal'
 import VerticalSwiper from './page/VerticalSwiper'
 import SpaceBetweenSlides from './page/SpaceBetweenSlides'
 import Playground from './page/Playground'
+import CustomTrigger from './page/CustomTrigger'
 
-Array.from = Array.from || ((obj) => Array.prototype.slice.call(obj))
+Array.from = Array.from || (obj => Array.prototype.slice.call(obj))
 
 const components = {
-	'/': Home,
-	'playground': Playground,
-	'pull-to-refresh': PullToRefresh,
-	'swipe-to-show-action': SwipeToShowAction,
-	'animated-tabs': AnimatedTabs,
-	'swipeable-tabs': SwipeableTabs,
-	'slider-horizontal': SliderHorizontal,
-	'vertical-swiper': VerticalSwiper,
-	'space-between-slides': SpaceBetweenSlides,
+  '/': Home,
+  playground: Playground,
+  'pull-to-refresh': PullToRefresh,
+  'swipe-to-show-action': SwipeToShowAction,
+  'animated-tabs': AnimatedTabs,
+  'swipeable-tabs': SwipeableTabs,
+  'slider-horizontal': SliderHorizontal,
+  'vertical-swiper': VerticalSwiper,
+  'space-between-slides': SpaceBetweenSlides,
+  'custom-trigger': CustomTrigger
 }
 
 function renderView() {
-	let Target = components[location.hash.substr(1)] || Home
-    ReactDOM.render(
-    	<Target />,
-    	document.getElementById('root')
-    )
+  let Target = components[location.hash.substr(1)] || Home
+  ReactDOM.render(<Target />, document.getElementById('root'))
 }
 
 window.addEventListener('hashchange', renderView)

@@ -59,6 +59,7 @@ class Content extends Component {
     let { target, content } = this.refs
     let pullElement = new PullElement({
       target: target,
+      trigger: '#trigger',
       scroller: content,
       detectScroll: true,
       detectBoundary: true,
@@ -94,7 +95,25 @@ class Content extends Component {
   }
   render() {
     return (
-      <div ref="target" style={{ width: '100%', height: '100%' }}>
+      <div
+        ref="target"
+        style={{ width: '100%', height: '100%', position: 'relative' }}
+      >
+        <i
+          className="icon icon-red"
+          id="trigger"
+          style={{
+            position: 'fixed',
+            top: '50%',
+            right: 50,
+            zIndex: 100,
+            width: 50,
+            height: 50,
+            lineHeight: '50px'
+          }}
+        >
+          Trigger
+        </i>
         <div
           className="page-content pull-to-refresh-content transitioning"
           ref="content"

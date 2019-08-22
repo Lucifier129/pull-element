@@ -22,7 +22,8 @@ export default function Menu({ hash }) {
 	                    		<ListItem href="#swipeable-tabs" text="Swipeable Tabs" iconText="S" />
 	                    		<ListItem href="#slider-horizontal" text="Slider Horizontal" iconText="S" />
 	                    		<ListItem href="#vertical-swiper" text="Vertical Swiper" iconText="V" />
-	                    		<ListItem href="#space-between-slides" text="Space Between Slides" iconText="V" />
+	                    		<ListItem href="#space-between-slides" text="Space Between Slides" iconText="S" />
+													<ListItem href="#custom-trigger" text="CustomTrigger" iconText="C" />
 	                    		<ListItem href="#playground" text="Playground" iconText="P" />
 	                    	</ul>
 	                    </div>

@@ -65,6 +65,16 @@
 		return typeof elem === 'string' ? document.querySelector(elem) : elem
 	}
 
+	function getElems(elems) {
+		if (typeof elems === 'string') {
+			return Array.prototype.slice.call(document.querySelectorAll(elems))
+		} else if (elems.length) {
+			return Array.prototype.slice.call(elems)
+		} else {
+			return [elems]
+		}
+	}
+
 	function addEvent(elem, type, handler, options) {
 		elem.addEventListener(type, handler, options)
 	}
@@ -194,7 +204,7 @@
 			var options = this.options
 			var target = getElem(options.target)
 			var scroller = options.scroller ? getElem(options.scroller) : target
-			var trigger = options.trigger ? getElem(options.trigger) : target
+			var trigger = options.trigger ? getElems(options.trigger) : [target]
 
 			this.target = target
 			this.scroller = scroller
@@ -270,13 +280,19 @@
 			return this.animateTo(0, 0, finalCallback)
 		},
 		enable: function() {
-			addEvent(this.trigger, 'touchstart', this.handleTouchStart)
+			for (var i = 0; i < this.trigger.length; i++) {
+				addEvent(this.trigger[i], 'touchstart', this.handleTouchStart)
+			}
+			
 			addEvent(document, 'touchmove', this.handleTouchMove, eventHandlerOptions)
 			addEvent(document, 'touchend', this.handleTouchEnd)
 			addEvent(document, 'touchcancel', this.handleTouchEnd)
 		},
 		disable: function() {
-			removeEvent(this.trigger, 'touchstart', this.handleTouchStart)
+			for (var i = 0; i < this.trigger.length; i++) {
+				removeEvent(this.trigger[i], 'touchstart', this.handleTouchStart)
+			}
+			
 			removeEvent(
 				document,
 				'touchmove',
